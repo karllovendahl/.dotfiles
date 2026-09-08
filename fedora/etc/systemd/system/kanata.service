@@ -1,0 +1,20 @@
+[Unit]
+Description=Kanata keyboard remapper
+Documentation=https://github.com/jtroo/kanata
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/kanata --cfg /etc/kanata/kanata.kbd --no-wait
+Restart=on-failure
+RestartSec=3
+
+# Kanata needs privileged access to physical keyboard devices and /dev/uinput.
+# Run the command-disabled binary as root rather than granting the login user
+# permanent access to every raw input device on the machine.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+
+[Install]
+WantedBy=multi-user.target

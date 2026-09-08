@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if ! command -v polybar >/dev/null 2>&1; then
+	if command -v dunstify >/dev/null 2>&1; then
+		dunstify --expire-time=4000 --stack-tag=polybar \
+			"Polybar is not installed" \
+			"Run: sudo dnf install -y polybar"
+	fi
+	exit 0
+fi
+
+polybar-msg cmd quit >/dev/null 2>&1 || true
+while pgrep -xu "$EUID" polybar >/dev/null; do
+	sleep 0.1
+done
+
+external_output="$(xrandr --query | awk '$2 == "connected" && $1 !~ /^eDP/ { print $1; exit }')"
+laptop_output="$(xrandr --query | awk '$2 == "connected" && $1 ~ /^eDP/ { print $1; exit }')"
+
+pids=()
+cleanup() {
+	for pid in "${pids[@]}"; do
+		kill "$pid" 2>/dev/null || true
+	done
+}
+trap cleanup EXIT TERM INT
+
+readonly modules_with_tray="memory cpu pulseaudio battery tray"
+readonly modules_without_tray="memory cpu pulseaudio battery"
+
+if [[ -n "$external_output" ]]; then
+	MONITOR="$external_output" POLYBAR_RIGHT="$modules_with_tray" polybar --reload external &
+	pids+=("$!")
+	if [[ -n "$laptop_output" ]]; then
+		MONITOR="$laptop_output" POLYBAR_RIGHT="$modules_without_tray" polybar --reload laptop &
+		pids+=("$!")
+	fi
+elif [[ -n "$laptop_output" ]]; then
+	MONITOR="$laptop_output" POLYBAR_RIGHT="$modules_with_tray" polybar --reload laptop &
+	pids+=("$!")
+fi
+
+wait

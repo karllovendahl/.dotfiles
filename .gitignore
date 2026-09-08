@@ -1,3 +1,4 @@
 .DS_Store
+.pi/
 common/.config/tmux/plugins/
 common/.config/nvim/plugin/packer_compiled.lua

@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+action="${1:-}"
+
+confirm() {
+	local prompt="$1"
+	local answer
+	answer="$(printf 'Cancel\n%s\n' "$prompt" | rofi -dmenu -i -p 'Confirm')"
+	[[ "$answer" == "$prompt" ]]
+}
+
+case "$action" in
+lock)
+	exec "$HOME/.local/bin/i3-lock-safe"
+	;;
+suspend)
+	exec systemctl suspend
+	;;
+logout)
+	confirm "Log Out" && exec i3-msg exit
+	;;
+restart)
+	confirm "Restart" && exec systemctl reboot
+	;;
+shutdown)
+	confirm "Shut Down" && exec systemctl poweroff
+	;;
+*)
+	printf 'Usage: %s {lock|suspend|logout|restart|shutdown}\n' "${0##*/}" >&2
+	exit 2
+	;;
+esac

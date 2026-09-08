@@ -1,0 +1,7 @@
+{
+  "uuid": "numbered-workspaces@dotfiles",
+  "name": "Numbered Workspaces",
+  "description": "Move the clock left, show numbered workspaces, preserve primary-monitor focus, and keep notification banners compact and temporary.",
+  "shell-version": ["50"],
+  "version": 2
+}

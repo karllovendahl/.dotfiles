@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+export PATH="$HOME/.local/bin:$PATH"
+
+output="$(i3-msg -t get_workspaces | jq -r '.[] | select(.focused).output')"
+
+if [[ "$output" != "eDP-1" ]]; then
+	exec rofi -monitor -1 -show drun \
+		-font "Hack Nerd Font Mono 12" \
+		-theme "$HOME/.config/rofi/themes/rose-pine-dawn-external.rasi"
+fi
+
+exec rofi -monitor -1 -show drun

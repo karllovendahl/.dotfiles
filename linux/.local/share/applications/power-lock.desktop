@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Lock Screen
+GenericName=Lock Session
+Comment=Lock this session
+Icon=system-lock-screen
+Exec=i3-system-action lock
+Terminal=false
+Categories=System;
+Keywords=lock;screen;session;
+NoDisplay=false

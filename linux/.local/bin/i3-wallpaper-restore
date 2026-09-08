@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ -x "$HOME/.fehbg" ]]; then
+	"$HOME/.fehbg"
+elif command -v feh >/dev/null 2>&1 && [[ -f "$HOME/.config/wallpaper/current" ]]; then
+	feh --bg-fill "$(<"$HOME/.config/wallpaper/current")"
+fi
+
+"$HOME/.local/bin/i3-lock-background-refresh" >/dev/null 2>&1 &

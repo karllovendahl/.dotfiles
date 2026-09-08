@@ -1,0 +1,10 @@
+#%PAM-1.0
+# Use Fedora's password-only authentication stack for terminal sudo. The Fedora
+# installer also disables fingerprint authentication globally because stock
+# i3lock cannot present concurrent password and fingerprint prompts reliably.
+auth       include      password-auth
+account    include      system-auth
+password   include      system-auth
+session    optional     pam_keyinit.so revoke
+session    required     pam_limits.so
+session    include      system-auth

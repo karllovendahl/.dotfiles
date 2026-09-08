@@ -1,0 +1,17 @@
+configuration {
+    modi: "drun";
+    show-icons: false;
+    display-drun: "Apps";
+    drun-display-format: "{name}";
+    font: "Hack Nerd Font Mono 18";
+    terminal: "wezterm";
+    matching: "fuzzy";
+    sort: true;
+    fixed-num-lines: true;
+    kb-remove-to-eol: "";
+    kb-accept-entry: "Control+m,Return,KP_Enter";
+    kb-row-up: "Up,Control+k";
+    kb-row-down: "Down,Control+j";
+}
+
+@theme "rose-pine-dawn"

@@ -1,0 +1,12 @@
+* {
+    base: #faf4ed;
+    surface: #fffaf3;
+    overlay: #f2e9e1;
+    text: #575279;
+    muted: #9893a5;
+    selected: #56949f;
+    urgent: #b4637a;
+    border-color: #575279;
+    background-color: transparent;
+    text-color: @text;
+}

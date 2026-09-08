@@ -1,0 +1,21 @@
+;; System-wide keyboard remapping for Fedora.
+;;
+;; Caps Lock behaves like Escape when tapped and Left Control when held. All
+;; other keys pass through unchanged. `tap-hold-press` activates Control early
+;; when Caps Lock is chorded with another key, which keeps shortcuts responsive.
+
+(defcfg
+  process-unmapped-keys yes
+)
+
+(defsrc
+  caps
+)
+
+(defalias
+  cap (tap-hold-press 200 200 esc lctl)
+)
+
+(deflayer base
+  @cap
+)

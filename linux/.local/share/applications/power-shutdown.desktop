@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Shut Down
+GenericName=Power Off Computer
+Comment=Turn off this computer
+Icon=system-shutdown
+Exec=i3-system-action shutdown
+Terminal=false
+Categories=System;
+Keywords=shutdown;poweroff;power off;
+NoDisplay=false

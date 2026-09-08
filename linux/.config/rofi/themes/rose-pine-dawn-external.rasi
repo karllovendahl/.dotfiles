@@ -1,0 +1,10 @@
+@import "rose-pine-dawn.rasi"
+
+window {
+    width: 480px;
+    padding: 14px;
+}
+
+element {
+    padding: 10px;
+}

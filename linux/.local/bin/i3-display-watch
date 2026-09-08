@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+apply_layout() {
+	local force="${1:-false}"
+	exec 9>"${XDG_RUNTIME_DIR:-/tmp}/i3-display-layout.lock"
+	flock 9
+
+	# Avoid display/bar churn while i3lock owns the screen during resume.
+	while pgrep -xu "$EUID" i3lock >/dev/null 2>&1; do
+		sleep 0.5
+	done
+
+	xrandr_state="$(xrandr --query)"
+	while read -r output; do
+		[[ -n "$output" ]] && xrandr --output "$output" --off
+	done < <(awk '$2 == "disconnected" { print $1 }' <<<"$xrandr_state")
+
+	internal_output="$(awk '$2 == "connected" && $1 ~ /^eDP/ { print $1; exit }' <<<"$xrandr_state")"
+	external_output="$(awk '$2 == "connected" && $1 !~ /^eDP/ { print $1; exit }' <<<"$xrandr_state")"
+	lid_closed=false
+	if grep -q 'closed' /proc/acpi/button/lid/*/state 2>/dev/null; then
+		lid_closed=true
+	fi
+
+	state_file="${XDG_RUNTIME_DIR:-/tmp}/i3-display-layout.state"
+	desired_state="${internal_output}|${external_output}|${lid_closed}"
+	if [[ "$force" != true && -r "$state_file" && "$(<"$state_file")" == "$desired_state" ]]; then
+		exit 0
+	fi
+
+	if [[ -n "$external_output" && "$lid_closed" == true ]]; then
+		xrandr --output "$external_output" --primary --preferred --scale 1x1 --filter nearest --pos 0x0
+		if [[ -n "$internal_output" ]]; then
+			xrandr --output "$internal_output" --off
+		fi
+		target_output="$external_output"
+	elif [[ -n "$external_output" && -n "$internal_output" ]]; then
+		xrandr \
+			--output "$external_output" --primary --preferred --scale 1x1 --filter nearest --pos 0x0 \
+			--output "$internal_output" --preferred --scale 1x1 --filter nearest --below "$external_output"
+		target_output="$external_output"
+	elif [[ -n "$internal_output" ]]; then
+		xrandr --output "$internal_output" --primary --preferred --scale 1x1 --filter nearest --pos 0x0
+		target_output="$internal_output"
+	else
+		exit 0
+	fi
+
+	workspaces="$(i3-msg -t get_workspaces)"
+	focused_workspace="$(jq -r '.[] | select(.focused).name' <<<"$workspaces")"
+	for workspace in 1 2 3 4; do
+		if jq -e --arg name "$workspace" '.[] | select(.name == $name)' <<<"$workspaces" >/dev/null; then
+			i3-msg "workspace number $workspace; move workspace to output $target_output" >/dev/null
+		fi
+	done
+	[[ -n "$focused_workspace" ]] && i3-msg "workspace $focused_workspace" >/dev/null
+
+	printf '%s\n' "$desired_state" >"$state_file"
+	"$HOME/.local/bin/i3-wallpaper-restore" 9>&- >/dev/null 2>&1 || true
+	"$HOME/.local/bin/polybar-launch" 9>&- >/dev/null 2>&1 &
+}
+
+if [[ "${1:-}" == "--apply" ]]; then
+	apply_layout "${2:-false}"
+	exit 0
+fi
+
+if [[ -z "${I3_DISPLAY_WATCH_CHILD:-}" ]]; then
+	I3_DISPLAY_WATCH_CHILD=1 exec -a i3-display-watch bash "$0"
+fi
+
+exec 8>"${XDG_RUNTIME_DIR:-/tmp}/i3-display-watch.lock"
+flock --nonblock 8 || exit 0
+
+schedule_apply() {
+	(
+		sleep 0.5
+		exec "$0" --apply
+	) 8>&- &
+}
+
+watch_drm() {
+	while IFS= read -r event; do
+		[[ "$event" == KERNEL*change*drm* ]] && schedule_apply
+	done < <(stdbuf -oL udevadm monitor --kernel --subsystem-match=drm 8>&-)
+}
+
+watch_lid() {
+	dbus-monitor --system \
+		"type='signal',sender='org.freedesktop.login1',interface='org.freedesktop.DBus.Properties',member='PropertiesChanged',path='/org/freedesktop/login1'" 8>&- |
+		while IFS= read -r event; do
+			[[ "$event" == *'LidClosed'* ]] && schedule_apply
+		done
+}
+
+# Apply once at login, then react only to DRM and logind lid events.
+"$0" --apply true 8>&-
+watch_drm &
+drm_pid="$!"
+watch_lid &
+lid_pid="$!"
+trap 'kill "$drm_pid" "$lid_pid" 2>/dev/null || true' EXIT TERM INT
+wait
