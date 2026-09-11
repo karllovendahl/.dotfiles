@@ -1,5 +1,3 @@
-vim.pack.add({ "https://github.com/dmtrKovalenko/fff.nvim" })
-
 local PREVIEW_MATCH_HL = "FFFPreviewMatch"
 local PREVIEW_MATCH_GROUP = "fff_preview_match_highlight"
 
@@ -62,6 +60,9 @@ vim.api.nvim_create_autocmd("PackChanged", {
     require("fff.download").download_or_build_binary()
   end,
 })
+
+-- Register the build hook before installation so fresh machines receive the native backend.
+vim.pack.add({ "https://github.com/dmtrKovalenko/fff.nvim" })
 
 local function find_files()
   require("fff").find_files()
