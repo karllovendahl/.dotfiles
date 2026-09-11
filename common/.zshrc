@@ -4,21 +4,22 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 
-# Set Powerlevel10k path based on OS
-if [[ "$(uname)" == "Darwin" ]]; then
-    # macOS-specific configurations
-    export POWERLEVEL10K_PATH="/opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme"
-    export PATH="/Applications/Opera GX.app/Contents/MacOS:$PATH"
-elif [[ "$(uname)" == "Linux" ]]; then
-    # Linux-specific configurations
-    export POWERLEVEL10K_PATH="/usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme"
-    if [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+# Load Powerlevel10k from a user install first, then platform package paths.
+for POWERLEVEL10K_PATH in \
+    "$HOME/.local/share/powerlevel10k/powerlevel10k.zsh-theme" \
+    "/opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme" \
+    "/usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme"; do
+    if [[ -r "$POWERLEVEL10K_PATH" ]]; then
+        source "$POWERLEVEL10K_PATH"
+        break
     fi
-fi
+done
+unset POWERLEVEL10K_PATH
 
-if [[ -n "$POWERLEVEL10K_PATH" && -r "$POWERLEVEL10K_PATH" ]]; then
-    source "$POWERLEVEL10K_PATH"
+if [[ "$(uname)" == "Darwin" ]]; then
+    export PATH="/Applications/Opera GX.app/Contents/MacOS:$PATH"
+elif [[ "$(uname)" == "Linux" && -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
 
 export NVM_DIR="$HOME/.nvm"
@@ -39,7 +40,9 @@ export PATH="$HOME/.local/bin:$PATH"
 # Nix
 export PATH="$HOME/.nix-profile/bin:$PATH"
 
-export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
+if [[ "$(uname)" == "Darwin" && -d "/opt/homebrew/opt/postgresql@17/bin" ]]; then
+    export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
+fi
 
 # Add .NET Core SDK tools
 export PATH="$PATH:$HOME/.dotnet/tools"
@@ -64,7 +67,17 @@ bindkey -v
 bindkey '^R' history-incremental-search-backward
 
 ############### AUTO COMPLETION ##################
-# Initialize completion system
+# Add optional completion directories before initializing the completion system.
+if [[ -n "${ASDF_DIR:-}" && -d "$ASDF_DIR/completions" ]]; then
+    fpath=("$ASDF_DIR/completions" $fpath)
+fi
+
+if [[ "$(uname)" == "Darwin" && -d "/opt/homebrew/share/zsh-completions" ]]; then
+    fpath=(/opt/homebrew/share/zsh-completions $fpath)
+elif [[ "$(uname)" == "Linux" && -d "/usr/share/zsh/site-functions" ]]; then
+    fpath=(/usr/share/zsh/site-functions $fpath)
+fi
+
 autoload -Uz compinit
 compinit
 
@@ -74,18 +87,6 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 # Menu selection for completions
 zstyle ':completion:*' menu select
 
-# ASDF completions
-fpath=(${ASDF_DIR}/completions $fpath)
-
-# Load zsh-completions
-if [[ "$(uname)" == "Darwin" ]]; then
-    FPATH=/opt/homebrew/share/zsh-completions:$FPATH
-elif [[ "$(uname)" == "Linux" ]]; then
-    if [[ -d "/usr/share/zsh/site-functions" ]]; then
-        FPATH=/usr/share/zsh/site-functions:$FPATH
-    fi
-fi
-
 #################### ALIAS #######################
 
 alias ls="eza --icons=always"
@@ -93,7 +94,7 @@ alias g="git"
 alias python="python3"
 alias gppr="git_pr.sh"
 alias gpsu="git_push_upstream.sh"
-alias gh="git_home.sh"
+alias ghome="git_home.sh"
 alias gl="git log --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 alias gpf="git push --force-with-lease"
 alias grbc="git rebase --continue"
@@ -111,8 +112,12 @@ alias pax='~/landfolk-worktrees/pax/bin/pax --cwd "$PWD"'
 alias eko='~/repos/eko/bin/eko --cwd "$PWD"'
 
 #################### PLUGINS #######################
-source <(fzf --zsh)
-eval "$(zoxide init zsh)"
+if command -v fzf >/dev/null 2>&1; then
+    source <(fzf --zsh)
+fi
+if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init zsh)"
+fi
 if command -v direnv >/dev/null 2>&1; then
     eval "$(direnv hook zsh)"
 fi
