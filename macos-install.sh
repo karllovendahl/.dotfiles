@@ -99,6 +99,7 @@ stow_packages() {
   fi
 
   stow --dir="$REPO_ROOT" --target="$HOME" --restow common macos
+  "$HOME/.local/bin/palette-apply"
   log_success "Stowed common and macOS packages"
 }
 

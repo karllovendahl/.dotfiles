@@ -40,6 +40,15 @@ stow --target="$HOME" --restow common linux
 stow --target="$HOME" --restow common macos
 ```
 
+## Palette
+
+`common/.config/palette/ink-paper.sh` is the single editable light-workstation
+palette. Run `palette-apply` after changing it; native adapters for Sway,
+Waybar, Fuzzel, Dunst, gtklock, WezTerm, Powerlevel10k, Neovim, and tmux are
+rendered from it. `palette-apply --check` reports generated-file drift. Do not
+hand-edit generated adapters; edit their palette template only when a consumer
+needs a different native format.
+
 ## Notes
 
 - `exports/raycast` is not a stow package. It stores exported config snapshots only.

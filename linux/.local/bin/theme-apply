@@ -20,8 +20,7 @@ printf '%s\n' "$theme_name" >"$theme_root/current"
 mkdir -p \
 	"$HOME/.config/polybar" \
 	"$HOME/.config/rofi/themes" \
-	"$HOME/.config/i3" \
-	"$HOME/.config/dunst"
+	"$HOME/.config/i3"
 
 cat >"$HOME/.config/polybar/colors.ini" <<EOF_COLORS
 [colors]
@@ -60,80 +59,10 @@ client.unfocused        $BACKGROUND $BACKGROUND $MUTED $BACKGROUND $BACKGROUND
 client.urgent           $URGENT $URGENT $BACKGROUND $URGENT $URGENT
 EOF_I3
 
-cat >"$HOME/.config/dunst/dunstrc" <<EOF_DUNST
-[global]
-    monitor = 0
-    follow = mouse
-    width = 360
-    height = 120
-    origin = top-right
-    offset = 16x40
-    scale = 0
-    notification_limit = 5
-    indicate_hidden = yes
-    shrink = no
-    transparency = 0
-    separator_height = 1
-    padding = 12
-    horizontal_padding = 14
-    text_icon_padding = 0
-    frame_width = 2
-    frame_color = "$BORDER"
-    separator_color = frame
-    sort = yes
-    idle_threshold = 120
-    font = Hack Nerd Font Mono 10
-    line_height = 0
-    markup = full
-    format = "<b>%s</b>\\n%b"
-    alignment = left
-    vertical_alignment = center
-    show_age_threshold = 60
-    ellipsize = middle
-    ignore_newline = no
-    stack_duplicates = true
-    hide_duplicate_count = false
-    show_indicators = yes
-    icon_position = off
-    min_icon_size = 0
-    max_icon_size = 0
-    sticky_history = yes
-    history_length = 20
-    dmenu = /usr/bin/rofi -dmenu
-    browser = /usr/bin/xdg-open
-    always_run_script = true
-    title = Dunst
-    class = Dunst
-    corner_radius = 8
-    ignore_dbusclose = false
-    force_xwayland = false
-    force_xinerama = false
-
-[urgency_low]
-    background = "$BACKGROUND"
-    foreground = "$FOREGROUND"
-    timeout = 4
-
-[urgency_normal]
-    background = "$BACKGROUND"
-    foreground = "$FOREGROUND"
-    timeout = 5
-
-[urgency_critical]
-    background = "$BACKGROUND"
-    foreground = "$URGENT"
-    frame_color = "$URGENT"
-    timeout = 8
-EOF_DUNST
-
 if command -v polybar-msg >/dev/null 2>&1; then
 	polybar-msg cmd restart >/dev/null 2>&1 || "$HOME/.local/bin/polybar-launch" >/dev/null 2>&1 &
 fi
 if command -v i3-msg >/dev/null 2>&1; then
 	i3-msg reload >/dev/null 2>&1 || true
 fi
-if command -v dunstctl >/dev/null 2>&1; then
-	dunstctl reload >/dev/null 2>&1 || pkill -HUP dunst >/dev/null 2>&1 || true
-fi
-
 printf 'Applied theme: %s\n' "${THEME_NAME:-$theme_name}"

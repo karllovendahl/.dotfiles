@@ -39,10 +39,43 @@ elseif wezterm.target_triple:match("darwin") then
 end
 
 -- Common configuration options
+local palette = dofile(wezterm.home_dir .. "/.config/palette/generated/palette.lua")
+
 config.font = wezterm.font("Hack Nerd Font Mono")
 config.font_size = 10
 config.enable_tab_bar = false
-config.color_scheme = "Rosé Pine Dawn (Gogh)"
+-- Shared light palette used by Sway, Waybar, Fuzzel, Neovim, and tmux.
+config.colors = {
+  foreground = palette.ink,
+  background = palette.paper,
+  cursor_bg = palette.rust,
+  cursor_fg = palette.paper,
+  cursor_border = palette.rust,
+  selection_fg = palette.ink,
+  selection_bg = palette.diff_text,
+  scrollbar_thumb = palette.slate,
+  split = palette.navy,
+  ansi = {
+    palette.navy,
+    palette.red,
+    palette.green,
+    palette.ochre,
+    palette.blue,
+    palette.rust,
+    palette.teal,
+    palette.overlay,
+  },
+  brights = {
+    palette.slate,
+    palette.bright_red,
+    palette.bright_green,
+    palette.bright_ochre,
+    palette.bright_blue,
+    palette.bright_rust,
+    palette.bright_teal,
+    palette.paper,
+  },
+}
 config.window_background_opacity = 1
 -- Omarchy/Mako keeps critical notifications persistent, and WezTerm sends
 -- OSC toast notifications as critical with no timeout on Linux.

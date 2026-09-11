@@ -174,6 +174,7 @@ for relative_path in .config/dunst .config/theme; do
 	fi
 done
 stow --dir="$REPO_ROOT" --target="$HOME" --restow common linux
+"$HOME/.local/bin/palette-apply"
 
 if [[ "${XDG_CURRENT_DESKTOP:-}" == *GNOME* ]]; then
 	log "Configuring GNOME and the parallel Sway session"

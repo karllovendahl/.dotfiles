@@ -37,14 +37,15 @@
   # Zsh >= 5.1 is required.
   [[ $ZSH_VERSION == (5.<1->*|<6->.*) ]] || return
 
-  # Prompt colors (Catppuccin Macchiato).
-  local grey='#6e738d'     # overlay0
-  local red='#ed8796'      # red
-  local yellow='#eed49f'   # yellow
-  local blue='#8aadf4'     # blue
-  local magenta='#c6a0f6'  # mauve
-  local cyan='#7dc4e4'     # sapphire
-  local white='#cad3f5'    # text
+  # Generated values keep the prompt aligned with the workstation palette.
+  source "$HOME/.config/palette/generated/palette.sh"
+  local grey=$PALETTE_SLATE
+  local red=$PALETTE_RED
+  local yellow=$PALETTE_OCHRE
+  local blue=$PALETTE_NAVY
+  local magenta=$PALETTE_RUST
+  local cyan=$PALETTE_TEAL
+  local white=$PALETTE_PAPER
 
   # Left prompt segments.
   typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
@@ -100,8 +101,8 @@
   typeset -g POWERLEVEL9K_VIRTUALENV_SHOW_PYTHON_VERSION=false
   typeset -g POWERLEVEL9K_VIRTUALENV_{LEFT,RIGHT}_DELIMITER=
 
-  # Blue current directory.
-  typeset -g POWERLEVEL9K_DIR_FOREGROUND=$blue
+  # Keep the current directory quieter than the command being entered.
+  typeset -g POWERLEVEL9K_DIR_FOREGROUND=$grey
 
   # Context format when root: user@host. The first part white, the rest grey.
   typeset -g POWERLEVEL9K_CONTEXT_ROOT_TEMPLATE="%F{$white}%n%f%F{$grey}@%m%f"
@@ -133,16 +134,16 @@
 
     if (( $1 )); then
       local       meta='%f'
-      local      clean='%F{#6e738d}'
-      local   modified='%F{#eed49f}'
-      local  untracked='%F{#6e738d}'
-      local conflicted='%F{#ed8796}'
+      local      clean="%F{$PALETTE_SLATE}"
+      local   modified="%F{$PALETTE_OCHRE}"
+      local  untracked="%F{$PALETTE_SLATE}"
+      local conflicted="%F{$PALETTE_RED}"
     else
       local       meta='%f'
-      local      clean='%F{#6e738d}'
-      local   modified='%F{#eed49f}'
-      local  untracked='%F{#6e738d}'
-      local conflicted='%F{#ed8796}'
+      local      clean="%F{$PALETTE_SLATE}"
+      local   modified="%F{$PALETTE_OCHRE}"
+      local  untracked="%F{$PALETTE_SLATE}"
+      local conflicted="%F{$PALETTE_RED}"
     fi
 
     local res

@@ -1,31 +1,3 @@
-local PREVIEW_MATCH_HL = "FFFPreviewMatch"
-local PREVIEW_MATCH_GROUP = "fff_preview_match_highlight"
-
-local function get_hl(name)
-  local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
-  return ok and hl or {}
-end
-
-local function apply_fff_preview_match_highlight()
-  local statement = get_hl("Statement")
-  local search = get_hl("Search")
-  local inc = get_hl("IncSearch")
-
-  vim.api.nvim_set_hl(0, PREVIEW_MATCH_HL, {
-    fg = statement.fg or inc.fg,
-    bg = search.bg or inc.bg,
-    bold = true,
-  })
-end
-
-apply_fff_preview_match_highlight()
-
-vim.api.nvim_create_autocmd("ColorScheme", {
-  group = vim.api.nvim_create_augroup(PREVIEW_MATCH_GROUP, { clear = true }),
-  callback = apply_fff_preview_match_highlight,
-  desc = "Refresh FFF preview grep match highlight",
-})
-
 vim.g.fff = {
   keymaps = {
     move_up = { "<Up>", "<C-k>" },
@@ -34,12 +6,21 @@ vim.g.fff = {
     cycle_grep_modes = "<C-s>",
   },
   layout = {
-    prompt_position = "buttom",
+    prompt_position = "bottom",
     preview_position = "top",
   },
   hl = {
+    border = "FFFBorder",
+    normal = "FFFNormal",
+    cursor = "FFFCursor",
+    directory_path = "FFFDirectoryPath",
+    matched = "FFFMatched",
+    prompt = "FFFPrompt",
+    selected = "FFFSelected",
+    selected_active = "FFFSelectedActive",
+    title = "FFFTitle",
     winhl = {
-      preview = "Normal:NormalFloat,FloatBorder:FloatBorder,FloatTitle:Title,IncSearch:" .. PREVIEW_MATCH_HL,
+      preview = "Normal:FFFNormal,FloatBorder:FFFBorder,FloatTitle:FFFTitle,IncSearch:FFFPreviewMatch",
     },
   },
 }

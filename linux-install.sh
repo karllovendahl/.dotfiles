@@ -88,6 +88,7 @@ stow_packages() {
 
   log_info "Stowing common and linux packages into $HOME..."
   stow --dir="$REPO_ROOT" --target="$HOME" --restow common linux
+  "$HOME/.local/bin/palette-apply"
   log_success "Stowed common and linux packages"
 }
 
