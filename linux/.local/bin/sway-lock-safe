@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+readonly WALLPAPER="$HOME/Pictures/wallpapers/wallpaper_icy.jpg"
+readonly BLURRED_WALLPAPER="${XDG_CACHE_HOME:-$HOME/.cache}/sway/lock-background.jpg"
+
+# Lock requests can arrive from a keybinding, logind, idle timeout, and
+# before-sleep at nearly the same time. Keep one locker responsible for the
+# ext-session-lock protocol.
+if pgrep -xu "$USER" '^(gtklock|swaylock)$' >/dev/null; then
+  exit 0
+fi
+
+if command -v gtklock >/dev/null 2>&1 && [[ -r /etc/pam.d/gtklock ]]; then
+  if [[ -r "$BLURRED_WALLPAPER" ]]; then
+    exec gtklock --daemonize --background "$BLURRED_WALLPAPER"
+  fi
+  if [[ -r "$WALLPAPER" ]]; then
+    exec gtklock --daemonize --background "$WALLPAPER"
+  fi
+  exec gtklock --daemonize
+fi
+
+# Keep locking safe while gtklock is not installed yet.
+exec swaylock -f

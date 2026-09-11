@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# shellcheck source=/dev/null
+source "$HOME/.config/palette/generated/palette.sh"
+
+readonly SOURCE="$HOME/Pictures/wallpapers/wallpaper_icy.jpg"
+readonly CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/sway"
+readonly OUTPUT="$CACHE_DIR/lock-background.jpg"
+
+if [[ ! -r "$SOURCE" ]]; then
+  exit 0
+fi
+
+if [[ "${1:-}" != "--force" && -r "$OUTPUT" && "$OUTPUT" -nt "$SOURCE" ]]; then
+  exit 0
+fi
+
+mkdir -p "$CACHE_DIR"
+temporary="$(mktemp --tmpdir="$CACHE_DIR" --suffix=.jpg .lock-background.XXXXXX)"
+trap 'rm -f -- "$temporary"' EXIT
+
+# Generate ahead of locking: a large Gaussian blur is intentionally expensive,
+# while the lock path itself must stay immediate and dependable.
+magick "${SOURCE}[0]" \
+  -auto-orient \
+  -colorspace sRGB \
+  -blur 0x48 \
+  -fill "$PALETTE_INK" \
+  -colorize 18 \
+  -strip \
+  -quality 90 \
+  "$temporary"
+chmod 0600 "$temporary"
+mv -f -- "$temporary" "$OUTPUT"
+trap - EXIT

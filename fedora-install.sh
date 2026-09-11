@@ -33,6 +33,7 @@ readonly -a FEDORA_PACKAGES=(
 	gnome-shell-extension-appindicator
 	gnome-shell-extension-pop-shell
 	gnome-shell-extension-pop-shell-shortcut-overrides
+	gtklock
 	i3
 	i3-config-fedora
 	i3lock
@@ -179,6 +180,11 @@ done
 stow --dir="$REPO_ROOT" --target="$HOME" --restow common linux
 "$HOME/.local/bin/palette-apply"
 
+if [[ -r "$HOME/Pictures/wallpapers/wallpaper_icy.jpg" ]]; then
+	log "Preparing the blurred Sway lock background"
+	"$HOME/.local/bin/sway-lock-background-refresh"
+fi
+
 if [[ "${XDG_CURRENT_DESKTOP:-}" == *GNOME* ]]; then
 	log "Configuring GNOME and the parallel Sway session"
 	"$REPO_ROOT/fedora/configure-gnome.sh"
@@ -215,7 +221,7 @@ Fedora setup complete.
 - Open Neovim normally and let vim.pack/Mason finish their own setup.
 - Kanata remaps Caps Lock to Escape when tapped and Control when held.
 - Terminal sudo uses the account password instead of fingerprint authentication.
-- i3 is the primary lightweight tiling session; GNOME and Sway remain available.
-- Choose i3, GNOME, or Sway from GDM's gear menu before signing in.
+- Sway is the primary lightweight tiling session; i3 and GNOME remain available.
+- Choose Sway, i3, or GNOME from GDM's gear menu before signing in.
 - If this installer ran outside GNOME, run fedora/configure-gnome.sh once from a GNOME session.
 EOF
