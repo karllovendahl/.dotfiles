@@ -1,0 +1,139 @@
+@import "colors.css";
+
+* {
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  font-family: "Hack Nerd Font Mono";
+  font-size: 12px;
+  font-weight: 600;
+}
+
+window#waybar {
+  color: @ink;
+  background: transparent;
+}
+
+window#waybar > box {
+  background: @surface;
+  border-top: 2px solid @line;
+  border-right: 2px solid @line;
+  border-bottom: 2px solid @line;
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+  background: @surface;
+}
+
+#custom-mark-left {
+  padding: 0 12px;
+  color: @surface;
+  background: @line;
+  font-weight: 700;
+}
+
+#clock {
+  padding: 0 10px;
+  color: @ink;
+  background: @surface;
+}
+
+#custom-slash-left,
+#custom-slash-right {
+  padding: 0 4px;
+  color: @blue;
+  background: @surface;
+  font-size: 15px;
+}
+
+#custom-slash-right {
+  color: @teal;
+}
+
+#custom-divider {
+  padding: 0 3px;
+  color: @rust;
+  background: @surface;
+  font-size: 17px;
+}
+
+#memory,
+#cpu,
+#pulseaudio,
+#battery {
+  padding: 0 7px;
+  color: @ink_soft;
+  background: @surface;
+}
+
+#pulseaudio,
+#battery {
+  color: @ink;
+}
+
+#pulseaudio.muted,
+#battery.warning {
+  color: @ochre;
+}
+
+#battery.charging,
+#battery.full,
+#battery.plugged {
+  color: @green;
+}
+
+#battery.critical:not(.charging) {
+  color: @red;
+}
+
+#workspaces {
+  background: @surface;
+}
+
+#workspaces button {
+  min-width: 36px;
+  padding: 0;
+  color: @ink_soft;
+  background: @surface;
+  box-shadow: none;
+  text-shadow: none;
+  transition: none;
+}
+
+#workspaces button:hover {
+  color: @ink_soft;
+  background: @surface;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+#workspaces button.visible {
+  color: @ink;
+  background: @surface;
+}
+
+#workspaces button.focused,
+#workspaces button.active {
+  color: @ink;
+  background-color: @surface;
+  background-image: url("workspace-brackets.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+#workspaces button.urgent {
+  color: @red;
+  background: @surface;
+}
+
+tooltip {
+  color: @ink;
+  background: @surface;
+  border: 2px solid @line;
+}
+
+tooltip label {
+  padding: 8px;
+}
