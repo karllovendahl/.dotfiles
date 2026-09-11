@@ -1,13 +1,3 @@
-vim.pack.add({
-	"https://github.com/epwalsh/obsidian.nvim",
-	"https://github.com/nvim-lua/plenary.nvim",
-})
-
-local ok, obsidian = pcall(require, "obsidian")
-if not ok then
-	return
-end
-
 local workspaces = {}
 for _, workspace in ipairs({
 	{ name = "personal", path = "~/repos/notes/personal" },
@@ -20,6 +10,16 @@ for _, workspace in ipairs({
 end
 
 if #workspaces == 0 then
+	return
+end
+
+vim.pack.add({
+	"https://github.com/epwalsh/obsidian.nvim",
+	"https://github.com/nvim-lua/plenary.nvim",
+})
+
+local ok, obsidian = pcall(require, "obsidian")
+if not ok then
 	return
 end
 
