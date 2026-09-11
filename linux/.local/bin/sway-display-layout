@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+readonly INTERNAL_OUTPUT="eDP-1"
+readonly RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}"
+
+apply_layout() {
+  local outputs internal_active external_count external_output external_height
+  local workspaces focused_workspace workspace current_output
+
+  outputs="$(swaymsg -t get_outputs -r)"
+  internal_active="$(jq -r --arg internal "$INTERNAL_OUTPUT" \
+    '.[] | select(.name == $internal) | .active' <<<"$outputs")"
+  external_count="$(jq -r --arg internal "$INTERNAL_OUTPUT" \
+    '[.[] | select(.active and .name != $internal)] | length' <<<"$outputs")"
+
+  if ((external_count == 0)); then
+    if [[ "$internal_active" == "true" ]]; then
+      swaymsg "output $INTERNAL_OUTPUT position 0 0" >/dev/null
+      for workspace in 1 2 3 4; do
+        swaymsg "workspace $workspace output $INTERNAL_OUTPUT" >/dev/null
+      done
+    fi
+    return
+  fi
+
+  # One external display is the intentional supported shape. With two or more,
+  # leave the layout alone instead of silently picking the wrong screen.
+  if ((external_count != 1)); then
+    return
+  fi
+
+  external_output="$(jq -r --arg internal "$INTERNAL_OUTPUT" \
+    '.[] | select(.active and .name != $internal) | .name' <<<"$outputs")"
+  external_height="$(jq -r --arg name "$external_output" \
+    '.[] | select(.name == $name) | .current_mode.height' <<<"$outputs")"
+
+  # Keep the external work display above the laptop, regardless of connector or
+  # monitor EDID. The laptop panel is only repositioned when it is active.
+  swaymsg "output $external_output position 0 0" >/dev/null
+  if [[ "$internal_active" == "true" ]]; then
+    swaymsg "output $INTERNAL_OUTPUT position 0 $external_height" >/dev/null
+  fi
+
+  # Register placement for future workspaces as well as moving existing ones.
+  # This makes Super+4 create workspace 4 on the external display even when it
+  # did not exist at the time the monitor was attached.
+  for workspace in 1 2 3 4; do
+    swaymsg "workspace $workspace output $external_output" >/dev/null
+  done
+
+  workspaces="$(swaymsg -t get_workspaces -r)"
+  focused_workspace="$(jq -r '.[] | select(.focused) | .num' <<<"$workspaces")"
+
+  # Workspaces 1–4 belong to the external work display. Workspace 5 belongs
+  # to the laptop whenever it is available. Skip already-correct workspaces to
+  # avoid visible focus churn on unrelated output events.
+  for workspace in 1 2 3 4; do
+    current_output="$(jq -r --argjson number "$workspace" \
+      '.[] | select(.num == $number) | .output' <<<"$workspaces")"
+    if [[ -n "$current_output" && "$current_output" != "$external_output" ]]; then
+      swaymsg "workspace number $workspace; move workspace to output $external_output" >/dev/null
+    fi
+  done
+
+  if [[ "$internal_active" == "true" ]]; then
+    current_output="$(jq -r '.[] | select(.num == 5) | .output' <<<"$workspaces")"
+    if [[ -n "$current_output" && "$current_output" != "$INTERNAL_OUTPUT" ]]; then
+      swaymsg "workspace number 5; move workspace to output $INTERNAL_OUTPUT" >/dev/null
+    fi
+  fi
+
+  if [[ -n "$focused_workspace" && "$focused_workspace" != "null" ]]; then
+    swaymsg "workspace number $focused_workspace" >/dev/null
+  fi
+}
+
+exec 9>"$RUNTIME_DIR/sway-display-layout.lock"
+flock --nonblock 9 || exit 0
+
+apply_layout
+if [[ "${1:-}" == "--apply" ]]; then
+  exit 0
+fi
+
+# React only to output changes. Sway owns the actual layout; this process just
+# reapplies the user's one-external-display policy after hotplug events.
+while true; do
+  swaymsg -t subscribe '["output"]' | while IFS= read -r _; do
+    sleep 0.25
+    apply_layout
+  done
+  sleep 1
+done
