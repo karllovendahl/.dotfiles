@@ -9,3 +9,4 @@ Terminal=false
 Categories=System;
 Keywords=lock;screen;session;
 NoDisplay=false
+NotShowIn=sway;

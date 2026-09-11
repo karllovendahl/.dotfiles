@@ -9,3 +9,4 @@ Terminal=false
 Categories=System;
 Keywords=suspend;sleep;power;
 NoDisplay=false
+NotShowIn=sway;

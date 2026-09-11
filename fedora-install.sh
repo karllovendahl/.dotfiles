@@ -24,7 +24,9 @@ readonly -a FEDORA_PACKAGES=(
 	eza
 	fd-find
 	feh
+	fuzzel
 	fontconfig
+	grimshot
 	fzf
 	git
 	gnome-extensions-app
@@ -49,6 +51,7 @@ readonly -a FEDORA_PACKAGES=(
 	slop
 	sway
 	sway-config-fedora
+	swaybg
 	swayidle
 	swaylock
 	tmux

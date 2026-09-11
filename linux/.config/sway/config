@@ -1,0 +1,2 @@
+# Use Fedora's maintained Sway configuration, then layer config.d overrides.
+include /etc/sway/config

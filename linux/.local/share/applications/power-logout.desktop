@@ -9,3 +9,4 @@ Terminal=false
 Categories=System;
 Keywords=logout;log out;sign out;session;
 NoDisplay=false
+NotShowIn=sway;

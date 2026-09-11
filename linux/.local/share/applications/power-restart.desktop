@@ -9,3 +9,4 @@ Terminal=false
 Categories=System;
 Keywords=restart;reboot;power;
 NoDisplay=false
+NotShowIn=sway;
