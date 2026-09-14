@@ -139,59 +139,6 @@ if ! fc-match 'Hack Nerd Font Mono' | grep -qi 'HackNerdFontMono'; then
 fi
 
 log "Stowing the shared and Linux configuration"
-# Earlier setup iterations created managed links for the retired X11/i3 stack.
-# Remove only links owned by this checkout; never delete personal local config.
-for relative_path in \
-	.Xresources \
-	.xprofile \
-	.config/autorandr \
-	.config/i3 \
-	.config/i3status \
-	.config/omarchy \
-	.config/picom \
-	.config/polybar \
-	.config/rofi \
-	.config/theme \
-	.config/ulauncher \
-	.config/walker \
-	.config/wofi \
-	.config/xdg-desktop-portal/i3-portals.conf \
-	.local/bin/flameshot-x11 \
-	.local/bin/i3bar-polybar-fallback \
-	.local/bin/i3-display-watch \
-	.local/bin/i3-lock-background-refresh \
-	.local/bin/i3-lock-safe \
-	.local/bin/i3-osd \
-	.local/bin/i3-screenshot \
-	.local/bin/i3-system-action \
-	.local/bin/i3-wallpaper-restore \
-	.local/bin/polybar-launch \
-	.local/bin/rofi-launcher \
-	.local/bin/theme-apply; do
-	target="$HOME/$relative_path"
-	if [[ -L "$target" && "$(realpath -m -- "$target")" == "$REPO_ROOT/linux/"* ]]; then
-		rm -- "$target"
-	fi
-done
-for relative_path in \
-	.local/share/applications/org.flameshot.Flameshot.desktop \
-	.local/share/applications/power-lock.desktop \
-	.local/share/applications/power-logout.desktop \
-	.local/share/applications/power-restart.desktop \
-	.local/share/applications/power-shutdown.desktop \
-	.local/share/applications/power-suspend.desktop; do
-	target="$HOME/$relative_path"
-	if [[ -L "$target" && "$(realpath -m -- "$target")" == "$REPO_ROOT/linux/"* ]]; then
-		rm -- "$target"
-	fi
-done
-for relative_path in .config/dunst; do
-	target="$HOME/$relative_path"
-	expected="$REPO_ROOT/linux/$relative_path"
-	if [[ -L "$target" && "$(readlink -f -- "$target")" == "$(readlink -f -- "$expected")" ]]; then
-		rm -- "$target"
-	fi
-done
 stow --dir="$REPO_ROOT" --target="$HOME" --restow common linux
 "$HOME/.local/bin/palette-apply"
 

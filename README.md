@@ -56,7 +56,6 @@ needs a different native format.
 - `macos/Brewfile` remains in the `macos` package because its natural target is `$HOME`.
 - `linux-install.sh` bootstraps the current Arch-based Linux dependency set, stows `common` and `linux`, then renders palette adapters.
 - `fedora-install.sh` bootstraps Zsh, Neovim, tmux, WezTerm, Kanata, the Sway desktop session, and GNOME with Pop Shell on Fedora. It stows `common` and `linux`, renders palette adapters, installs privileged files explicitly from `fedora/etc/`, and applies GNOME preferences with `fedora/configure-gnome.sh`. It does not remove installed packages.
-- `fedora-retire-i3.sh --confirm` is the one-time, explicit Fedora migration that removes the retired i3/Xorg desktop packages and its old X11-only tools while retaining Sway, GNOME Wayland, and XWayland.
 
 ## Fedora terminal setup
 
