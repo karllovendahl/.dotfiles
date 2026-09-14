@@ -13,17 +13,14 @@ readonly P10K_DIR="$HOME/.local/share/powerlevel10k"
 readonly FONT_DIR="$HOME/.local/share/fonts/HackNerdFont"
 readonly TPM_DIR="$HOME/.config/tmux/plugins/tpm"
 readonly -a FEDORA_PACKAGES=(
-	arandr
 	blueman
 	brightnessctl
 	curl
-	dex-autostart
 	direnv
 	dnf5-plugins
 	dunst
 	eza
 	fd-find
-	feh
 	fuzzel
 	fontconfig
 	grimshot
@@ -34,22 +31,13 @@ readonly -a FEDORA_PACKAGES=(
 	gnome-shell-extension-pop-shell
 	gnome-shell-extension-pop-shell-shortcut-overrides
 	gtklock
-	i3
-	i3-config-fedora
-	i3lock
 	ImageMagick
-	i3status
 	jq
-	maim
 	network-manager-applet
 	neovim
 	pavucontrol
-	picom
 	playerctl
-	polybar
-	rofi
 	stow
-	slop
 	sway
 	sway-config-fedora
 	swaybg
@@ -62,19 +50,11 @@ readonly -a FEDORA_PACKAGES=(
 	wl-clipboard
 	xdg-desktop-portal-gtk
 	xdg-desktop-portal-wlr
-	xorg-x11-server-Xorg
-	xbanish
-	xdotool
-	xrandr
-	xset
 	xorg-x11-server-Xwayland
-	xclip
-	xss-lock
 	xz
 	zoxide
 	zsh
 )
-
 log() {
 	printf '\n==> %s\n' "$1"
 }
@@ -132,18 +112,8 @@ sudo install -Dm0644 "$REPO_ROOT/fedora/etc/kanata/kanata.kbd" /etc/kanata/kanat
 sudo install -Dm0644 "$REPO_ROOT/fedora/etc/modules-load.d/kanata.conf" /etc/modules-load.d/kanata.conf
 sudo install -Dm0644 "$REPO_ROOT/fedora/etc/systemd/system/kanata.service" /etc/systemd/system/kanata.service
 
-log "Configuring X11 touchpad preferences"
-sudo install -Dm0644 "$REPO_ROOT/fedora/etc/X11/xorg.conf.d/30-touchpad.conf" /etc/X11/xorg.conf.d/30-touchpad.conf
-
-log "Configuring password-only authentication for sudo and i3lock"
+log "Configuring password-only authentication for sudo"
 sudo install -Dm0644 "$REPO_ROOT/fedora/etc/pam.d/sudo" /etc/pam.d/sudo
-if authselect current 2>/dev/null | grep -qx -- '- with-fingerprint'; then
-	sudo authselect disable-feature with-fingerprint
-fi
-if grep -Eq '^[[:space:]]*auth.*pam_fprintd\.so' /etc/pam.d/system-auth; then
-	echo "Fingerprint PAM remains enabled; refusing to install an unreliable i3lock session." >&2
-	exit 1
-fi
 
 sudo modprobe uinput
 sudo systemctl daemon-reload
@@ -169,9 +139,53 @@ if ! fc-match 'Hack Nerd Font Mono' | grep -qi 'HackNerdFontMono'; then
 fi
 
 log "Stowing the shared and Linux configuration"
-# Earlier setup iterations created these as absolute links. Remove only links
-# that resolve to the exact tracked directories so Stow can recreate ownership.
-for relative_path in .config/dunst .config/theme; do
+# Earlier setup iterations created managed links for the retired X11/i3 stack.
+# Remove only links owned by this checkout; never delete personal local config.
+for relative_path in \
+	.Xresources \
+	.xprofile \
+	.config/autorandr \
+	.config/i3 \
+	.config/i3status \
+	.config/omarchy \
+	.config/picom \
+	.config/polybar \
+	.config/rofi \
+	.config/theme \
+	.config/ulauncher \
+	.config/walker \
+	.config/wofi \
+	.config/xdg-desktop-portal/i3-portals.conf \
+	.local/bin/flameshot-x11 \
+	.local/bin/i3bar-polybar-fallback \
+	.local/bin/i3-display-watch \
+	.local/bin/i3-lock-background-refresh \
+	.local/bin/i3-lock-safe \
+	.local/bin/i3-osd \
+	.local/bin/i3-screenshot \
+	.local/bin/i3-system-action \
+	.local/bin/i3-wallpaper-restore \
+	.local/bin/polybar-launch \
+	.local/bin/rofi-launcher \
+	.local/bin/theme-apply; do
+	target="$HOME/$relative_path"
+	if [[ -L "$target" && "$(realpath -m -- "$target")" == "$REPO_ROOT/linux/"* ]]; then
+		rm -- "$target"
+	fi
+done
+for relative_path in \
+	.local/share/applications/org.flameshot.Flameshot.desktop \
+	.local/share/applications/power-lock.desktop \
+	.local/share/applications/power-logout.desktop \
+	.local/share/applications/power-restart.desktop \
+	.local/share/applications/power-shutdown.desktop \
+	.local/share/applications/power-suspend.desktop; do
+	target="$HOME/$relative_path"
+	if [[ -L "$target" && "$(realpath -m -- "$target")" == "$REPO_ROOT/linux/"* ]]; then
+		rm -- "$target"
+	fi
+done
+for relative_path in .config/dunst; do
 	target="$HOME/$relative_path"
 	expected="$REPO_ROOT/linux/$relative_path"
 	if [[ -L "$target" && "$(readlink -f -- "$target")" == "$(readlink -f -- "$expected")" ]]; then
@@ -221,8 +235,8 @@ Fedora setup complete.
 - Open a new terminal or sign out and back in to start Zsh.
 - Open Neovim normally and let vim.pack/Mason finish their own setup.
 - Kanata remaps Caps Lock to Escape when tapped and Control when held.
-- Terminal sudo uses the account password instead of fingerprint authentication.
-- Sway is the primary lightweight tiling session; i3 and GNOME remain available.
-- Choose Sway, i3, or GNOME from GDM's gear menu before signing in.
+- Terminal sudo uses the account password.
+- Sway is the lightweight tiling session; GNOME remains available from GDM's gear menu.
+- Choose Sway or GNOME from GDM's gear menu before signing in.
 - If this installer ran outside GNOME, run fedora/configure-gnome.sh once from a GNOME session.
 EOF

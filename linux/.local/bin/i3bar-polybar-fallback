@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-if command -v polybar >/dev/null 2>&1; then
-	exec "$HOME/.local/bin/polybar-launch"
-fi
-
-exec i3bar "$@"

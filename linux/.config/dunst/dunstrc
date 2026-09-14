@@ -38,7 +38,7 @@
     max_icon_size = 40
     sticky_history = yes
     history_length = 20
-    dmenu = /usr/bin/rofi -dmenu
+    dmenu = /usr/bin/fuzzel --dmenu
     browser = /usr/bin/xdg-open
     corner_radius = 0
     icon_corner_radius = 0

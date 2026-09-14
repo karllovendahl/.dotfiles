@@ -1,7 +1,0 @@
-! Render X11 fonts and toolkit UI larger without resampling the display.
-! Xft DPI is global across this X display; it cannot target only eDP-1.
-Xft.dpi: 96
-Xft.antialias: true
-Xft.hinting: true
-Xft.hintstyle: hintslight
-Xft.rgba: rgb
