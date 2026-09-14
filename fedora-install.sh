@@ -58,6 +58,7 @@ readonly -a FEDORA_PACKAGES=(
 	tmux
 	unzip
 	waybar
+	wdisplays
 	wl-clipboard
 	xdg-desktop-portal-gtk
 	xdg-desktop-portal-wlr
