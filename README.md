@@ -65,7 +65,7 @@ Run the installer from a clone of this repository:
 ./fedora-install.sh
 ```
 
-The installer uses WezTerm's official nightly COPR, installs Powerlevel10k and Hack Nerd Font in user space, validates the terminal configs, and changes the login shell to Zsh. It also installs a pinned, checksum-verified Kanata binary and enables the tracked system service that maps Caps Lock to Escape when tapped and Control when held. Neovim manages its own plugins and Mason tools when it is opened normally.
+The installer uses WezTerm's official nightly COPR, installs Powerlevel10k and Hack Nerd Font in user space, validates the terminal configs, and changes the login shell to Zsh. It also installs a pinned, checksum-verified Kanata binary and enables the tracked system service that maps Caps Lock to Escape when tapped and Control when held. Neovim manages its own plugins and Mason tools when it is opened normally. Its FFF picker indexes the active buffer's Git root and refuses `$HOME` or `/`, preventing unsafe filesystem-wide native scans.
 
 Sway is the lightweight tiling session, alongside GNOME with Pop Shell in GDM's gear menu. Sway uses Fedora's maintained session, portal, and autostart integration with personal output, input, binding, Waybar, gtklock, and `wdisplays` configuration layered on top. A user-level Sway fragment preserves Fedora's idle, display-power, logind, and before-sleep behavior while routing every lock request through one guarded gtklock command. XWayland remains installed so individual X11 applications continue to run under Sway; no X11 desktop session is configured.
 
