@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Waybar is launched by Sway's bar stanza. Stop a stale process first, then
+# reload Sway so that launcher always starts one fresh instance.
+pkill -x waybar 2>/dev/null || true
+exec swaymsg reload
