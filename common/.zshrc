@@ -37,8 +37,8 @@ export VISUAL="nvim"
 export PATH="$HOME/.config/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 
-# Nix
-export PATH="$HOME/.nix-profile/bin:$PATH"
+# User-installed developer tools.
+export PATH="$HOME/.cargo/bin:$HOME/.nix-profile/bin:$PATH"
 
 if [[ "$(uname)" == "Darwin" && -d "/opt/homebrew/opt/postgresql@17/bin" ]]; then
     export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
