@@ -9,7 +9,7 @@
   "reload_style_on_change": true,
   "modules-left": ["custom/mark-left", "clock", "custom/slash-left"],
   "modules-center": ["sway/workspaces"],
-  "modules-right": ["custom/slash-right", "memory", "custom/divider", "cpu", "custom/divider", "pulseaudio", "custom/divider", "battery"],
+  "modules-right": ["custom/slash-right", "memory", "custom/divider", "cpu", "custom/divider", "pulseaudio", "custom/divider", "network", "custom/divider", "battery"],
 
   "custom/mark-left": {
     "format": "[ thock ]"
@@ -52,6 +52,17 @@
     "format-icons": ["░░░░░", "█░░░░", "██░░░", "███░░", "████░", "█████"],
     "on-click": "pavucontrol",
     "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle"
+  },
+  "network": {
+    "interval": 5,
+    "format-wifi": "NET [{icon}] {signalStrength}%",
+    "format-ethernet": "NET [ETH]",
+    "format-disconnected": "NET [OFF]",
+    "format-icons": ["░░░░░", "█░░░░", "██░░░", "███░░", "████░", "█████"],
+    "tooltip-format-wifi": "{essid}\n{ipaddr}\nSignal: {signalStrength}%",
+    "tooltip-format-ethernet": "{ifname}\n{ipaddr}",
+    "tooltip-format-disconnected": "No network connection",
+    "on-click": "nm-connection-editor"
   },
   "battery": {
     "bat": "BAT0",

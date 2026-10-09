@@ -26,10 +26,6 @@ readonly -a FEDORA_PACKAGES=(
 	grimshot
 	fzf
 	git
-	gnome-extensions-app
-	gnome-shell-extension-appindicator
-	gnome-shell-extension-pop-shell
-	gnome-shell-extension-pop-shell-shortcut-overrides
 	gtklock
 	ImageMagick
 	jq
@@ -69,6 +65,11 @@ if [[ ! -r /etc/os-release ]] || ! grep -q '^ID=fedora$' /etc/os-release; then
 	exit 1
 fi
 
+if [[ "$(uname -m)" != "x86_64" ]]; then
+	echo "The pinned Kanata binary currently supports x86_64 Fedora only." >&2
+	exit 1
+fi
+
 missing_packages=()
 for package in "${FEDORA_PACKAGES[@]}"; do
 	if ! rpm -q "$package" >/dev/null 2>&1; then
@@ -87,11 +88,6 @@ if ! command -v wezterm >/dev/null 2>&1; then
 	log "Enabling the official WezTerm nightly COPR"
 	sudo dnf copr enable -y "$WEZTERM_COPR"
 	sudo dnf install -y wezterm
-fi
-
-if [[ "$(uname -m)" != "x86_64" ]]; then
-	echo "The pinned Kanata binary currently supports x86_64 Fedora only." >&2
-	exit 1
 fi
 
 if ! /usr/local/bin/kanata --version 2>/dev/null | grep -q "${KANATA_VERSION}"; then
@@ -138,20 +134,130 @@ if ! fc-match 'Hack Nerd Font Mono' | grep -qi 'HackNerdFontMono'; then
 	trap - EXIT
 fi
 
-log "Stowing the shared and Linux configuration"
-stow --dir="$REPO_ROOT" --target="$HOME" --restow common linux
-"$HOME/.local/bin/palette-apply"
+link_resolves_under() {
+	local target="$1" source_root="$2" link_source
+	[[ -L "$target" ]] || return 1
+	link_source="$(readlink -- "$target")"
+	[[ "$link_source" == /* ]] || link_source="$(dirname -- "$target")/$link_source"
+	link_source="$(realpath -ms -- "$link_source")"
+	[[ "$link_source" == "$source_root/"* ]]
+}
+
+legacy_linux_link() {
+	link_resolves_under "$1" "$REPO_ROOT/linux"
+}
+
+migrate_legacy_linux_links() {
+	local package="$1" migration_dir manifest archive profile_manifest profile_archive target relative
+	migration_dir="$(mktemp -d)"
+	manifest="$migration_dir/legacy-links"
+	archive="$migration_dir/legacy-links.tar"
+	profile_manifest="$migration_dir/profile-links"
+	profile_archive="$migration_dir/profile-links.tar"
+
+	for root in "$HOME/.config" "$HOME/.local" "$HOME/.Xresources" "$HOME/.xprofile"; do
+		[[ -e "$root" || -L "$root" ]] || continue
+		while IFS= read -r -d '' target; do
+			if legacy_linux_link "$target"; then
+				relative=".${target#"$HOME"}"
+				printf '%s\0' "$relative" >>"$manifest"
+			fi
+		done < <(find -P "$root" -maxdepth 6 -type l -print0)
+	done
+
+	if [[ ! -s "$manifest" ]]; then
+		stow --simulate --dir="$REPO_ROOT" --target="$HOME" --restow "$package"
+		stow --dir="$REPO_ROOT" --target="$HOME" --restow "$package"
+		rm -rf "$migration_dir"
+		return 0
+	fi
+	(
+		cd "$HOME"
+		tar --null --files-from="$manifest" --create --file="$archive"
+	)
+
+	archive_profile_links() {
+		for root in "$HOME/.config" "$HOME/.local" "$HOME/.Xresources" "$HOME/.xprofile"; do
+			[[ -e "$root" || -L "$root" ]] || continue
+			while IFS= read -r -d '' target; do
+				if link_resolves_under "$target" "$REPO_ROOT/$package"; then
+					relative=".${target#"$HOME"}"
+					printf '%s\0' "$relative" >>"$profile_manifest"
+				fi
+			done < <(find -P "$root" -maxdepth 6 -type l -print0)
+		done
+		[[ -s "$profile_manifest" ]] || return 0
+		(
+			cd "$HOME"
+			tar --null --files-from="$profile_manifest" --create --file="$profile_archive"
+		)
+	}
+
+	remove_profile_links() {
+		local current_profile_links="$migration_dir/current-profile-links"
+		: >"$current_profile_links"
+		for root in "$HOME/.config" "$HOME/.local" "$HOME/.Xresources" "$HOME/.xprofile"; do
+			[[ -e "$root" || -L "$root" ]] || continue
+			while IFS= read -r -d '' target; do
+				if link_resolves_under "$target" "$REPO_ROOT/$package"; then
+					printf '%s\0' "$target" >>"$current_profile_links"
+				fi
+			done < <(find -P "$root" -maxdepth 6 -type l -print0)
+		done
+		while IFS= read -r -d '' target; do rm -- "$target"; done <"$current_profile_links"
+	}
+
+	restore_legacy_links() {
+		while IFS= read -r -d '' relative; do rm -f -- "$HOME/${relative#.}"; done <"$manifest"
+		(
+			cd "$HOME"
+			tar --extract --file="$archive"
+		)
+		echo "Legacy Linux links restored after migration failed." >&2
+	}
+
+	restore_profile_links() {
+		remove_profile_links
+		[[ -s "$profile_manifest" ]] || return 0
+		(
+			cd "$HOME"
+			tar --extract --file="$profile_archive"
+		)
+	}
+
+	remove_legacy_links() {
+		local removal_failed=0
+		while IFS= read -r -d '' relative; do
+			rm -- "$HOME/${relative#.}" || removal_failed=1
+		done <"$manifest"
+		return "$removal_failed"
+	}
+
+	archive_profile_links
+	if ! remove_legacy_links ||
+		! stow --simulate --dir="$REPO_ROOT" --target="$HOME" --restow "$package"; then
+		restore_legacy_links
+		rm -rf "$migration_dir"
+		return 1
+	fi
+	if ! stow --dir="$REPO_ROOT" --target="$HOME" --restow "$package"; then
+		restore_profile_links || true
+		restore_legacy_links || true
+		rm -rf "$migration_dir"
+		return 1
+	fi
+	rm -rf "$migration_dir"
+}
+
+log "Stowing the shared configuration"
+stow --dir="$REPO_ROOT" --target="$HOME" --restow common
+log "Migrating legacy Linux links and stowing Fedora configuration"
+migrate_legacy_linux_links fedora-home
+"$HOME/.local/bin/palette-apply" --fedora
 
 if [[ -r "$HOME/Pictures/wallpapers/wallpaper_icy.jpg" ]]; then
 	log "Preparing the blurred Sway lock background"
 	"$HOME/.local/bin/sway-lock-background-refresh"
-fi
-
-if [[ "${XDG_CURRENT_DESKTOP:-}" == *GNOME* ]]; then
-	log "Configuring GNOME and the parallel Sway session"
-	"$REPO_ROOT/fedora/configure-gnome.sh"
-else
-	log "GNOME configuration deferred; run fedora/configure-gnome.sh once from a GNOME session"
 fi
 
 systemctl --user daemon-reload
@@ -183,7 +289,6 @@ Fedora setup complete.
 - Open Neovim normally and let vim.pack/Mason finish their own setup.
 - Kanata remaps Caps Lock to Escape when tapped and Control when held.
 - Terminal sudo uses the account password.
-- Sway is the lightweight tiling session; GNOME remains available from GDM's gear menu.
+- Sway is the primary session; stock GNOME remains available from GDM's gear menu.
 - Choose Sway or GNOME from GDM's gear menu before signing in.
-- If this installer ran outside GNOME, run fedora/configure-gnome.sh once from a GNOME session.
 EOF

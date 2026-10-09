@@ -14,14 +14,18 @@ readonly PALETTE_SOURCE="$REPO_ROOT/common/.config/palette/ink-paper.sh"
 readonly TEMPLATE_DIR="$REPO_ROOT/common/.config/palette/templates"
 
 mode="apply"
-case "${1:-}" in
-  ""|--apply) ;;
-  --check) mode="check" ;;
-  *)
-    echo "Usage: palette-apply [--apply|--check]" >&2
-    exit 2
-    ;;
-esac
+profile="common"
+for argument in "$@"; do
+  case "$argument" in
+    --apply) ;;
+    --check) mode="check" ;;
+    --fedora) profile="fedora" ;;
+    *)
+      echo "Usage: palette-apply [--check] [--fedora]" >&2
+      exit 2
+      ;;
+  esac
+done
 
 # shellcheck source=/dev/null
 source "$PALETTE_SOURCE"
@@ -63,11 +67,14 @@ render "palette.lua" "$REPO_ROOT/common/.config/palette/generated/palette.lua"
 render "palette.sh" "$REPO_ROOT/common/.config/palette/generated/palette.sh"
 render "sway.conf" "$REPO_ROOT/common/.config/palette/generated/sway.conf"
 render "tmux.conf" "$REPO_ROOT/common/.config/palette/generated/tmux.conf"
-render "waybar-colors.css" "$REPO_ROOT/linux/.config/waybar/colors.css"
 render "fuzzel.ini" "$REPO_ROOT/common/.config/palette/generated/fuzzel.ini"
-render "dunstrc" "$REPO_ROOT/linux/.config/dunst/dunstrc"
 render "gtklock.css" "$REPO_ROOT/common/.config/palette/generated/gtklock.css"
-render "workspace-brackets.svg" "$REPO_ROOT/linux/.config/waybar/workspace-brackets.svg"
+
+if [[ "$profile" == "fedora" ]]; then
+  render "waybar-colors.css" "$REPO_ROOT/fedora-home/.config/waybar/colors.css"
+  render "dunstrc" "$REPO_ROOT/fedora-home/.config/dunst/dunstrc"
+  render "workspace-brackets.svg" "$REPO_ROOT/fedora-home/.config/waybar/workspace-brackets.svg"
+fi
 
 if [[ "$mode" == "check" && "$changed" -ne 0 ]]; then
   echo "Run palette-apply to regenerate palette consumers." >&2

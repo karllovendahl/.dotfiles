@@ -62,6 +62,7 @@ window#waybar > box {
 #memory,
 #cpu,
 #pulseaudio,
+#network,
 #battery {
   padding: 0 7px;
   color: @ink_soft;
@@ -69,6 +70,7 @@ window#waybar > box {
 }
 
 #pulseaudio,
+#network,
 #battery {
   color: @ink;
 }
