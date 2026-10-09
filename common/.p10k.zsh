@@ -101,8 +101,8 @@
   typeset -g POWERLEVEL9K_VIRTUALENV_SHOW_PYTHON_VERSION=false
   typeset -g POWERLEVEL9K_VIRTUALENV_{LEFT,RIGHT}_DELIMITER=
 
-  # Keep the current directory quieter than the command being entered.
-  typeset -g POWERLEVEL9K_DIR_FOREGROUND=$grey
+  # Dark navy directory keeps it distinct from the lighter blue Git branch.
+  typeset -g POWERLEVEL9K_DIR_FOREGROUND=$PALETTE_NAVY
 
   # Context format when root: user@host. The first part white, the rest grey.
   typeset -g POWERLEVEL9K_CONTEXT_ROOT_TEMPLATE="%F{$white}%n%f%F{$grey}@%m%f"
@@ -120,7 +120,7 @@
   # Yellow previous command duration.
   typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=$yellow
 
-  # Muted Git segment with detailed counters (+N !N ?N).
+  # Blue branch names stay distinct from the muted slate directory; counters retain semantic colors.
   typeset -g POWERLEVEL9K_VCS_BRANCH_ICON=
   typeset -g POWERLEVEL9K_VCS_UNTRACKED_ICON='?'
 
@@ -134,13 +134,13 @@
 
     if (( $1 )); then
       local       meta='%f'
-      local      clean="%F{$PALETTE_SLATE}"
+      local      clean="%F{$PALETTE_BLUE}"
       local   modified="%F{$PALETTE_OCHRE}"
       local  untracked="%F{$PALETTE_SLATE}"
       local conflicted="%F{$PALETTE_RED}"
     else
       local       meta='%f'
-      local      clean="%F{$PALETTE_SLATE}"
+      local      clean="%F{$PALETTE_BLUE}"
       local   modified="%F{$PALETTE_OCHRE}"
       local  untracked="%F{$PALETTE_SLATE}"
       local conflicted="%F{$PALETTE_RED}"
