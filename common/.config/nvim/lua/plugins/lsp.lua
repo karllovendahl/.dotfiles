@@ -73,6 +73,8 @@ local server_settings = {
     },
   },
   ruby_lsp = {
+    -- Use a project-local .envrc when present; otherwise direnv passes through.
+    cmd = { "direnv", "exec", ".", "ruby-lsp" },
     init_options = {
       formatter = "syntax_tree",
       addonSettings = {
