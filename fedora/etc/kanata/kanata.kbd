@@ -9,13 +9,19 @@
 )
 
 (defsrc
-  caps
+  caps grv ralt 4
 )
 
 (defalias
   cap (tap-hold-press 200 200 esc lctl)
+  dollar RA-4
+  altgr (multi ralt (layer-while-held altgr))
 )
 
 (deflayer base
-  @cap
+  @cap @dollar @altgr 4
+)
+
+(deflayer altgr
+  _ _ _ 5
 )
