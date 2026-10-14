@@ -29,6 +29,7 @@ local mason_servers = {
   "jedi_language_server",
   "sqls",
   "tinymist",
+  "rust_analyzer",
 }
 
 local extra_servers = {
