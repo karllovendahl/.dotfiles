@@ -3,38 +3,29 @@ vim.pack.add({
   "https://github.com/nvim-tree/nvim-web-devicons",
 })
 
-local palette = dofile(vim.fn.expand("~/.config/palette/generated/palette.lua"))
-local colors = {
-  surface = palette.paper,
-  surface_alt = palette.overlay,
-  ink = palette.ink,
-  ink_soft = palette.slate,
-  line = palette.navy,
-  cyan = palette.teal,
-  accent = palette.rust,
-  ochre = palette.ochre,
-  red = palette.red,
-}
-
-local function sections(mode_background)
+local ok, palette = pcall(dofile, vim.fn.expand("~/.config/theme/current/nvim.lua"))
+if not ok then
+  require("lualine").setup({})
+  return
+end
+-- Neutral in normal and command mode; insert, visual and replace use the
+-- state colours.
+local function sections(mode_background, mode_foreground)
   return {
-    a = { bg = mode_background, fg = colors.surface, gui = "bold" },
-    b = { bg = colors.surface_alt, fg = colors.ink },
-    c = { bg = colors.surface, fg = colors.ink_soft },
+    a = { bg = mode_background, fg = mode_foreground or palette.background, gui = "bold" },
+    b = { bg = palette.overlay, fg = palette.foreground },
+    c = { bg = palette.background, fg = palette.muted },
   }
 end
 
+local quiet = { bg = palette.background, fg = palette.muted }
 local theme = {
-  normal = sections(colors.line),
-  insert = sections(colors.cyan),
-  visual = sections(colors.accent),
-  replace = sections(colors.red),
-  command = sections(colors.ochre),
-  inactive = {
-    a = { bg = colors.surface, fg = colors.ink_soft },
-    b = { bg = colors.surface, fg = colors.ink_soft },
-    c = { bg = colors.surface, fg = colors.ink_soft },
-  },
+  normal = sections(palette.overlay, palette.foreground),
+  insert = sections(palette.color2),
+  visual = sections(palette.color3),
+  replace = sections(palette.color1),
+  command = sections(palette.overlay, palette.foreground),
+  inactive = { a = quiet, b = quiet, c = quiet },
 }
 
 require("lualine").setup({

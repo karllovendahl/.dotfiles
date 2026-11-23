@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Ask running consumers to pick up ~/.config/theme/current. Neovim picks it up
+# on its next start.
+
+# WezTerm always watches its own config file, but loses a watch on the
+# rendered colours when theme-render swaps the whole directory. Touching the
+# config (this updates only its mtime) makes every window reload.
+if [[ -e "$HOME/.wezterm.lua" ]]; then
+  touch "$HOME/.wezterm.lua"
+fi
+
+if command -v tmux >/dev/null 2>&1 && tmux list-sessions >/dev/null 2>&1; then
+  # Load only the theme options; re-sourcing tmux.conf would re-run every
+  # plugin. Powerkit's own theme reload (which also drops its colour cache)
+  # takes seconds, so the tmux server runs it in the background. It must run
+  # inside tmux: started elsewhere, powerkit cannot read its options and falls
+  # back to its default theme.
+  tmux source-file "$HOME/.config/theme/current/tmux.conf" >/dev/null 2>&1 || true
+  powerkit_reload="$HOME/.config/tmux/plugins/tmux-powerkit/src/helpers/reload_theme.sh"
+  if [[ -r "$powerkit_reload" ]]; then
+    # Then apply the same layout fixes as tmux.conf does after tpm.
+    tmux run-shell -b "bash '$powerkit_reload'; bash '$HOME/.config/tmux/powerkit-finish.sh'" \
+      >/dev/null 2>&1 || true
+  fi
+fi
+
+# Platform packages add their own reloads (Sway, Waybar, Dunst) here.
+if [[ -x "$HOME/.local/bin/theme-reload-desktop" ]]; then
+  "$HOME/.local/bin/theme-reload-desktop"
+fi

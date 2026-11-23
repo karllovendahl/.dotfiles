@@ -1,0 +1,3 @@
+/* GTK 4 and libadwaita colours come from the active theme. GTK reads this file
+   when an app starts, so open apps change colour after a restart. */
+@import url("../theme/current/gtk4.css");

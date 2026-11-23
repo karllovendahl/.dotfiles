@@ -1,4 +1,5 @@
-@import "colors.css";
+/* Omarchy renders walker.css for the active theme. */
+@import "../../../omarchy/current/theme/walker.css";
 
 * {
   all: unset;

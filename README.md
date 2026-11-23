@@ -45,15 +45,49 @@ stow --target="$HOME" --restow common omarchy
 stow --target="$HOME" --restow common macos
 ```
 
-## Palette
+## Themes
 
-`common/.config/palette/ink-paper.sh` is the single editable light-workstation
-palette. Run `palette-apply` after changing it; add `--fedora` on the Fedora
-workstation to render its Sway, Waybar, Fuzzel, Dunst, and gtklock adapters.
-The shared terminal/editor adapters always render. `palette-apply --check`
-reports common-file drift; `palette-apply --fedora --check` also checks the
-Fedora adapters. Do not hand-edit generated adapters; edit their palette
-template only when a consumer needs a different native format.
+Theming follows Omarchy's model, so Omarchy themes drop in unchanged:
+
+- **Themes** live in `common/.config/themes/<name>/colors.toml`, in Omarchy's
+  format: `background`, `foreground`, `accent`, `cursor`, `selection_*` and
+  `color0`–`color15`. A `light.mode` file marks a light theme. A theme may also
+  set the chrome keys `surface`, `overlay`, `line`, `muted`, `on_accent` and
+  `diff_*`; `theme-render` derives any it leaves out.
+- **Templates** live in `<package>/.config/themed/*.tpl`, one per app, using
+  Omarchy's `{{ key }}`, `{{ key_strip }}` and `{{ key_rgb }}` placeholders.
+  `common` holds WezTerm, Neovim, tmux and prompt templates; `fedora` adds
+  Sway, Waybar, Fuzzel, Dunst, gtklock and GTK 4 (libadwaita apps such as
+  Files, which pick up colours when they start). Neovim and shell consumers
+  read the rendered keys under the same names: `palette.accent` in Lua,
+  `$THEME_ACCENT` in `colors.sh`.
+- **Wallpapers** live in the theme's `backgrounds/` folder, as in Omarchy.
+  The first image is linked as `~/.config/theme/current/background`, which
+  Sway and the lock screen use.
+- **Output** is rendered to `~/.config/theme/current/`, outside the repository.
+  App configs only import from that path, so switching themes never changes
+  tracked files.
+
+Every bar and status line uses the colours for the same roles, so the
+hierarchy reads the same in Waybar, tmux, Sway and every theme:
+
+| Role | Key | Examples |
+|---|---|---|
+| Surface | `background` | Waybar, tmux status line |
+| Text | `foreground` | clocks, labels, focused workspace number |
+| Focus and selection, used rarely | `accent` (tmux fill: `focus_fill`, a dark accent tint on dark themes) | Sway focused window, focused workspace brackets, tmux active window, selections (tmux copy mode, Neovim, Fuzzel), the cursor, the lock screen field and button; the Waybar frame on light themes (set `frame` to override) |
+| Everything else | `foreground` or `muted` text, `overlay` fill in tmux | `[ thock ]`, the prompt, tmux session, active pane border, other workspaces and windows, clocks, stats, borders and separators |
+| Faint lines | `line` | inactive pane borders, tooltip borders |
+| State only | `color1` red, `color2` green, `color3` yellow | battery, muted volume, tmux prefix and copy mode (green tint), search hits (yellow), Neovim insert, visual and replace modes, urgent |
+
+Switch with `theme-set <name>`. The installers
+render the current theme once after stowing; on a fresh manual `stow`, run
+`theme-set ink-paper` once.
+
+On Omarchy, Omarchy owns switching: `theme-set` calls `omarchy-theme-set`, and
+the `theme-set` hook renders the dotfiles templates from Omarchy's current
+`colors.toml`. Any Omarchy theme, including ones picked from Omarchy's menu,
+therefore also themes WezTerm, Neovim, tmux and the prompt.
 
 ## Notes
 

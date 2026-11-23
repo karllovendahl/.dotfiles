@@ -37,15 +37,13 @@
   # Zsh >= 5.1 is required.
   [[ $ZSH_VERSION == (5.<1->*|<6->.*) ]] || return
 
-  # Generated values keep the prompt aligned with the workstation palette.
-  source "$HOME/.config/palette/generated/palette.sh"
-  local grey=$PALETTE_SLATE
-  local red=$PALETTE_RED
-  local yellow=$PALETTE_OCHRE
-  local blue=$PALETTE_NAVY
-  local magenta=$PALETTE_RUST
-  local cyan=$PALETTE_TEAL
-  local white=$PALETTE_PAPER
+  # Rendered values keep the prompt aligned with the active theme.
+  [[ -r $HOME/.config/theme/current/colors.sh ]] && source "$HOME/.config/theme/current/colors.sh"
+  local grey=$THEME_MUTED
+  local red=$THEME_COLOR1
+  local yellow=$THEME_COLOR3
+  local text=$THEME_FOREGROUND
+  local white=$THEME_FOREGROUND
 
   # Left prompt segments.
   typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
@@ -82,8 +80,8 @@
   # in Pure that makes prompt drift down whenever you use the Alt-C binding from fzf or similar.
   typeset -g POWERLEVEL9K_PROMPT_ADD_NEWLINE=false
 
-  # Magenta prompt symbol if the last command succeeded.
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS}_FOREGROUND=$magenta
+  # Prompt symbol in the text colour if the last command succeeded.
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS}_FOREGROUND=$text
   # Red prompt symbol if the last command failed.
   typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS}_FOREGROUND=$red
   # Default prompt symbol.
@@ -102,7 +100,7 @@
   typeset -g POWERLEVEL9K_VIRTUALENV_{LEFT,RIGHT}_DELIMITER=
 
   # Dark navy directory keeps it distinct from the lighter blue Git branch.
-  typeset -g POWERLEVEL9K_DIR_FOREGROUND=$PALETTE_NAVY
+  typeset -g POWERLEVEL9K_DIR_FOREGROUND=$THEME_FOREGROUND
 
   # Context format when root: user@host. The first part white, the rest grey.
   typeset -g POWERLEVEL9K_CONTEXT_ROOT_TEMPLATE="%F{$white}%n%f%F{$grey}@%m%f"
@@ -134,16 +132,16 @@
 
     if (( $1 )); then
       local       meta='%f'
-      local      clean="%F{$PALETTE_BLUE}"
-      local   modified="%F{$PALETTE_OCHRE}"
-      local  untracked="%F{$PALETTE_SLATE}"
-      local conflicted="%F{$PALETTE_RED}"
+      local      clean="%F{$THEME_MUTED}"
+      local   modified="%F{$THEME_COLOR3}"
+      local  untracked="%F{$THEME_MUTED}"
+      local conflicted="%F{$THEME_COLOR1}"
     else
       local       meta='%f'
-      local      clean="%F{$PALETTE_BLUE}"
-      local   modified="%F{$PALETTE_OCHRE}"
-      local  untracked="%F{$PALETTE_SLATE}"
-      local conflicted="%F{$PALETTE_RED}"
+      local      clean="%F{$THEME_MUTED}"
+      local   modified="%F{$THEME_COLOR3}"
+      local  untracked="%F{$THEME_MUTED}"
+      local conflicted="%F{$THEME_COLOR1}"
     fi
 
     local res

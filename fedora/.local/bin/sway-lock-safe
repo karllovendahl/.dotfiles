@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-readonly WALLPAPER="$HOME/Pictures/wallpapers/wallpaper_icy.jpg"
+readonly WALLPAPER="$HOME/.config/theme/current/background"
 readonly BLURRED_WALLPAPER="${XDG_CACHE_HOME:-$HOME/.cache}/sway/lock-background.jpg"
 
 # Lock requests can arrive from a keybinding, logind, idle timeout, and

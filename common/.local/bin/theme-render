@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+# Render ~/.config/themed/*.tpl from an Omarchy-style colors.toml into
+# ~/.config/theme/current/, outside the dotfiles repository.
+#
+# Templates use Omarchy's placeholder syntax: {{ key }}, {{ key_strip }} (no
+# leading #) and {{ key_rgb }} (decimal r,g,b). Besides Omarchy's standard keys
+# (background, foreground, accent, cursor, selection_*, color0-15), templates
+# may use chrome keys that a theme can define or let this script derive:
+# surface, overlay, line, muted, on_accent, diff_add, diff_delete, diff_change,
+# diff_text, and mode (light or dark, from a light.mode file).
+#
+# Usage: theme-render <colors.toml> [theme-name]
+
+set -euo pipefail
+
+colors_file="${1:?Usage: theme-render <colors.toml> [theme-name]}"
+theme_dir="$(cd -- "$(dirname -- "$colors_file")" && pwd)"
+theme_name="${2:-$(basename -- "$theme_dir")}"
+template_dir="${THEME_TEMPLATE_DIR:-$HOME/.config/themed}"
+output_root="${THEME_OUTPUT_DIR:-$HOME/.config/theme}"
+
+[[ -f "$colors_file" ]] || { echo "theme-render: no colors file at $colors_file" >&2; exit 1; }
+
+work="$(mktemp -d)"
+trap 'rm -rf "$work"' EXIT
+keys="$work/keys"
+: >"$keys"
+
+# key=value lines, one per colour.
+while IFS='=' read -r key value; do
+  key="${key//[\"\' ]/}"
+  [[ -n "$key" && "$key" != \#* ]] || continue
+  value="${value#*[\"\']}"
+  value="${value%%[\"\']*}"
+  printf '%s=%s\n' "$key" "$value" >>"$keys"
+done <"$colors_file"
+
+get() { awk -F= -v k="$1" '$1 == k { v = $2 } END { print v }' "$keys"; }
+has() { [[ -n "$(get "$1")" ]]; }
+
+# Mix two #rrggbb colours: blend <from> <to> <percent of to>.
+blend() {
+  local a="${1#\#}" b="${2#\#}" pct="$3" out="#" i x y
+  for i in 0 2 4; do
+    x=$((16#${a:i:2})); y=$((16#${b:i:2}))
+    out+="$(printf '%02x' $(((x * (100 - pct) + y * pct + 50) / 100)))"
+  done
+  printf '%s' "$out"
+}
+
+for required in background foreground accent color1 color2 color4; do
+  has "$required" || { echo "theme-render: $colors_file is missing $required" >&2; exit 1; }
+done
+
+bg="$(get background)"; fg="$(get foreground)"
+# Derive any chrome key the theme leaves out.
+default() { has "$1" || printf '%s=%s\n' "$1" "$2" >>"$keys"; }
+default cursor "$fg"
+default selection_background "$(blend "$bg" "$fg" 25)"
+default selection_foreground "$fg"
+default surface "$(blend "$bg" "$fg" 4)"
+default overlay "$(blend "$bg" "$fg" 8)"
+default line "$(blend "$bg" "$fg" 22)"
+default muted "$(blend "$bg" "$fg" 70)"
+default on_accent "$bg"
+default diff_add "$(blend "$bg" "$(get color2)" 18)"
+default diff_delete "$(blend "$bg" "$(get color1)" 18)"
+default diff_change "$(blend "$bg" "$(get color4)" 12)"
+default diff_text "$(blend "$bg" "$(get color4)" 28)"
+# The bar frame stands out on light themes and blends into the bar on dark ones.
+# Focus fills (tmux session and active window) use the accent on light themes;
+# on dark ones a quiet accent tint with foreground text. mode_fill (tmux prefix
+# and copy mode) is a green tint, with foreground text in every theme.
+# button_fill (the lock screen's unlock button) is a dark green: plain green on
+# light themes, the mode_fill tint on dark ones.
+# match_fill (yellow, like a highlighter) marks copy-mode search hits.
+if [[ -f "$theme_dir/light.mode" ]]; then
+  default mode light
+  default frame "$(get accent)"
+  default focus_fill "$(get accent)"
+  default on_focus_fill "$(get on_accent)"
+  default button_fill "$(get color2)"
+  default on_button_fill "$(get on_accent)"
+else
+  default mode dark
+  default frame "$bg"
+  default focus_fill "$(blend "$bg" "$(get accent)" 25)"
+  default on_focus_fill "$fg"
+  default button_fill "$(blend "$bg" "$(get color2)" 30)"
+  default on_button_fill "$fg"
+fi
+default mode_fill "$(blend "$bg" "$(get color2)" 30)"
+default match_fill "$(blend "$bg" "$(get color3)" 30)"
+
+# One sed script for every key.
+script="$work/script.sed"
+while IFS='=' read -r key value; do
+  printf 's|{{ %s }}|%s|g\n' "$key" "$value"
+  printf 's|{{ %s_strip }}|%s|g\n' "$key" "${value#\#}"
+  if [[ "$value" =~ ^#[0-9a-fA-F]{6}$ ]]; then
+    printf 's|{{ %s_rgb }}|%d,%d,%d|g\n' "$key" \
+      "$((16#${value:1:2}))" "$((16#${value:3:2}))" "$((16#${value:5:2}))"
+  fi
+done <"$keys" >"$script"
+
+next="$output_root/next"
+rm -rf "$next"
+mkdir -p "$next"
+shopt -s nullglob
+for template in "$template_dir"/*.tpl; do
+  output="$next/$(basename -- "$template" .tpl)"
+  sed -f "$script" "$template" >"$output"
+  if grep -q '{{ [a-z0-9_]* }}' "$output"; then
+    echo "theme-render: unresolved placeholder in $(basename -- "$template"):" >&2
+    grep -o '{{ [a-z0-9_]* }}' "$output" | sort -u >&2
+    rm -rf "$next"
+    exit 1
+  fi
+done
+
+printf '%s\n' "$theme_name" >"$next/name"
+
+# Like Omarchy, a theme brings its wallpaper in backgrounds/; use the first.
+for image in "$theme_dir"/backgrounds/*.{jpg,jpeg,png,webp}; do
+  ln -s "$(cd -- "$(dirname -- "$image")" && pwd -P)/$(basename -- "$image")" "$next/background"
+  break
+done
+
+# Swap the finished render in with two renames, so consumers never read a
+# mix of old and new files. A missing current/ for that instant is harmless:
+# every consumer already falls back when it is absent.
+rm -rf "$output_root/previous"
+[[ -d "$output_root/current" ]] && mv "$output_root/current" "$output_root/previous"
+mv "$next" "$output_root/current"
+rm -rf "$output_root/previous"

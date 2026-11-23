@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Reload Fedora desktop consumers of ~/.config/theme/current.
+
+# Dunst reads colours from a drop-in that must live outside the repository.
+# If Stow folded ~/.config/dunst into one link to the package, unfold it into
+# a real directory with a relative dunstrc link, which Stow still recognises.
+dunst_dir="$HOME/.config/dunst"
+if [[ -L "$dunst_dir" ]]; then
+  package_dir="$(readlink -f -- "$dunst_dir")"
+  rm -- "$dunst_dir"
+  mkdir -p "$dunst_dir"
+  ln -s "$(realpath --relative-to="$dunst_dir" -- "$package_dir/dunstrc")" "$dunst_dir/dunstrc"
+fi
+mkdir -p "$dunst_dir/dunstrc.d"
+ln -sfn "$HOME/.config/theme/current/dunst.conf" "$dunst_dir/dunstrc.d/50-theme.conf"
+
+# Apps follow the GNOME colour scheme: libadwaita apps such as Files, and
+# browsers (also Flatpak ones) through the desktop portal. GTK 3 apps only
+# read gtk-theme.
+if command -v gsettings >/dev/null 2>&1; then
+  mode="$(. "$HOME/.config/theme/current/colors.sh" 2>/dev/null && printf '%s' "${THEME_MODE:-}")"
+  case "$mode" in
+    dark) scheme=prefer-dark gtk_theme=Adwaita-dark ;;
+    light) scheme=default gtk_theme=Adwaita ;;
+    *) scheme='' ;;
+  esac
+  if [[ -n "$scheme" ]]; then
+    gsettings set org.gnome.desktop.interface color-scheme "$scheme" || true
+    gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme" || true
+  fi
+fi
+
+# Rebuild the blurred lock background for the new wallpaper. The blur takes a
+# few seconds, so run it in the background; the lock falls back to the sharp
+# wallpaper until it is done.
+if [[ -x "$HOME/.local/bin/sway-lock-background-refresh" ]]; then
+  rm -f "${XDG_CACHE_HOME:-$HOME/.cache}/sway/lock-background.jpg"
+  setsid -f "$HOME/.local/bin/sway-lock-background-refresh" --force >/dev/null 2>&1 </dev/null
+fi
+
+if [[ -n "${SWAYSOCK:-}" ]] && command -v swaymsg >/dev/null 2>&1; then
+  # Apply the window colours and wallpaper directly instead of reloading all
+  # of Sway, and let Waybar reload its style in place (SIGUSR2), so nothing
+  # restarts or flashes. Only a missing Waybar is started the slow way.
+  theme="$HOME/.config/theme/current"
+  swaymsg "$({ grep -v '^#' "$theme/sway.conf"; echo "output * bg $theme/background fill"; } | paste -sd ';')" \
+    >/dev/null 2>&1 || true
+  if pgrep -x waybar >/dev/null; then
+    pkill -USR2 -x waybar || true
+  else
+    "$HOME/.local/bin/waybar-reload" >/dev/null 2>&1 || true
+  fi
+  command -v dunstctl >/dev/null 2>&1 && dunstctl reload >/dev/null 2>&1 || true
+fi

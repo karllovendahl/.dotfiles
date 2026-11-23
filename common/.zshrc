@@ -29,6 +29,19 @@ export NVM_DIR="$HOME/.nvm"
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+# Re-read the prompt colours when theme-set switches theme, so open shells
+# follow along instead of keeping the previous theme's colours.
+_theme_sync() {
+  local name
+  name=$(<"$HOME/.config/theme/current/name") 2>/dev/null || return
+  if [[ -n ${_theme_name-} && $name != "$_theme_name" ]]; then
+    source ~/.p10k.zsh && (( $+functions[p10k] )) && p10k reload
+  fi
+  _theme_name=$name
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _theme_sync
+
 ################### EXPORTS ######################
 
 export EDITOR="nvim"

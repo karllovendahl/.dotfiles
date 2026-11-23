@@ -143,8 +143,9 @@ link_resolves_under() {
 	[[ "$link_source" == "$source_root/"* ]]
 }
 
+# Links into linux/ or the pre-rename fedora-home/ package are legacy.
 legacy_linux_link() {
-	link_resolves_under "$1" "$REPO_ROOT/linux"
+	link_resolves_under "$1" "$REPO_ROOT/linux" || link_resolves_under "$1" "$REPO_ROOT/fedora-home"
 }
 
 migrate_legacy_linux_links() {
@@ -253,7 +254,7 @@ log "Stowing the shared configuration"
 stow --dir="$REPO_ROOT" --target="$HOME" --restow common
 log "Migrating legacy Linux links and stowing Fedora configuration"
 migrate_legacy_linux_links fedora
-"$HOME/.local/bin/palette-apply" --fedora
+"$HOME/.local/bin/theme-set" "$(cat "$HOME/.config/theme/current/name" 2>/dev/null || echo ink-paper)"
 
 if [[ -r "$HOME/Pictures/wallpapers/wallpaper_icy.jpg" ]]; then
 	log "Preparing the blurred Sway lock background"

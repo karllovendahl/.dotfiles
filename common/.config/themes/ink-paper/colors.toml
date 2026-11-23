@@ -1,0 +1,37 @@
+# Ink-and-paper light workstation theme, in Omarchy's colors.toml format.
+# The chrome keys below the ANSI colours are optional; theme-render derives
+# them for themes that leave them out.
+
+accent = "#26344f"
+cursor = "#26344f"
+foreground = "#162033"
+background = "#f8f8f7"
+selection_foreground = "#162033"
+selection_background = "#c8d4e3"
+
+color0 = "#26344f"
+color1 = "#aa3731"
+color2 = "#4f6f52"
+color3 = "#9a6200"
+color4 = "#3f5873"
+color5 = "#a84a2b"
+color6 = "#3f6f68"
+color7 = "#eceef1"
+color8 = "#667085"
+color9 = "#b65f65"
+color10 = "#66856a"
+color11 = "#b27f47"
+color12 = "#58718c"
+color13 = "#b86a4d"
+color14 = "#587f78"
+color15 = "#f8f8f7"
+
+surface = "#f3f3f1"
+overlay = "#eceef1"
+line = "#c8cdd5"
+muted = "#667085"
+on_accent = "#ffffff"
+diff_add = "#dbead5"
+diff_delete = "#f0d1d4"
+diff_change = "#e2e7ef"
+diff_text = "#c8d4e3"

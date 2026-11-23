@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Switch the workstation theme by name, for example `theme-set ink-paper`.
+#
+# On Omarchy, Omarchy owns theme switching: this delegates to omarchy-theme-set,
+# whose theme-set hook then renders the dotfiles templates. Elsewhere it renders
+# ~/.config/themes/<name>/colors.toml directly and reloads running consumers.
+
+set -euo pipefail
+
+name="${1:?Usage: theme-set <theme-name>}"
+
+if command -v omarchy-theme-set >/dev/null 2>&1; then
+  exec omarchy-theme-set "$name"
+fi
+
+colors="$HOME/.config/themes/$name/colors.toml"
+if [[ ! -f "$colors" ]]; then
+  echo "theme-set: unknown theme '$name'. Available:" >&2
+  ls "$HOME/.config/themes" >&2
+  exit 1
+fi
+
+"$HOME/.local/bin/theme-render" "$colors" "$name"
+"$HOME/.local/bin/theme-reload"

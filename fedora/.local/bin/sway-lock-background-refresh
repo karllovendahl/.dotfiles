@@ -3,9 +3,9 @@
 set -euo pipefail
 
 # shellcheck source=/dev/null
-source "$HOME/.config/palette/generated/palette.sh"
+source "$HOME/.config/theme/current/colors.sh"
 
-readonly SOURCE="$HOME/Pictures/wallpapers/wallpaper_icy.jpg"
+readonly SOURCE="$HOME/.config/theme/current/background"
 readonly CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/sway"
 readonly OUTPUT="$CACHE_DIR/lock-background.jpg"
 
@@ -27,7 +27,7 @@ magick "${SOURCE}[0]" \
   -auto-orient \
   -colorspace sRGB \
   -blur 0x48 \
-  -fill "$PALETTE_INK" \
+  -fill "$THEME_FOREGROUND" \
   -colorize 18 \
   -strip \
   -quality 90 \

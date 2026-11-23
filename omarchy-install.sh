@@ -205,7 +205,8 @@ stow_packages() {
   stow --dir="$REPO_ROOT" --target="$HOME" --restow common
   log_info "Migrating legacy Linux links and stowing Omarchy configuration..."
   migrate_legacy_linux_links omarchy
-  "$HOME/.local/bin/palette-apply"
+  # Render dotfiles templates from Omarchy's current theme.
+  bash "$HOME/.config/omarchy/hooks/theme-set"
   log_success "Stowed common and Omarchy packages"
 }
 

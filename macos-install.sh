@@ -99,7 +99,7 @@ stow_packages() {
   fi
 
   stow --dir="$REPO_ROOT" --target="$HOME" --restow common macos
-  "$HOME/.local/bin/palette-apply"
+  "$HOME/.local/bin/theme-set" "$(cat "$HOME/.config/theme/current/name" 2>/dev/null || echo ink-paper)"
   log_success "Stowed common and macOS packages"
 }
 

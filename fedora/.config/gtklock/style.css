@@ -1,12 +1,14 @@
-/* Ink-and-paper lock screen. The wallpaper is supplied by sway-lock-safe. */
-@import url("../palette/generated/gtklock.css");
+/* Lock screen. The wallpaper is supplied by sway-lock-safe; colours come from
+   the active theme. Text drawn straight onto the wallpaper stays white with a
+   dark shadow, so it reads on any wallpaper in any theme. */
+@import url("../theme/current/gtklock.css");
 
 window {
-  background-color: @palette-ink;
+  background-color: @lock-background;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  color: @palette-ink;
+  color: @lock-foreground;
   font-family: "Hack Nerd Font Mono";
 }
 
@@ -26,21 +28,21 @@ window {
 
 window #clock-label,
 window.focused:not(.hidden) #clock-label {
-  color: @palette-white;
+  color: #ffffff;
   font-size: 38px;
   font-weight: 700;
-  text-shadow: 0 1px 3px alpha(@palette-ink, 0.8);
+  text-shadow: 0 1px 3px alpha(#000000, 0.6);
 }
 
 window #date-label,
 window.focused:not(.hidden) #date-label {
-  color: @palette-overlay;
+  color: alpha(#ffffff, 0.85);
   font-size: 13px;
-  text-shadow: 0 1px 3px alpha(@palette-ink, 0.8);
+  text-shadow: 0 1px 3px alpha(#000000, 0.6);
 }
 
 #body-grid {
-  color: @palette-white;
+  color: #ffffff;
 }
 
 #input-label {
@@ -52,26 +54,26 @@ window.focused:not(.hidden) #date-label {
 #input-field {
   min-height: 38px;
   padding: 0 12px;
-  color: @palette-ink;
-  background-color: alpha(@palette-white, 0.92);
-  border: 2px solid @palette-white;
+  color: @lock-foreground;
+  background-color: alpha(@lock-background, 0.92);
+  border: 2px solid @lock-muted;
   border-radius: 0;
   box-shadow: none;
-  caret-color: @palette-rust;
+  caret-color: @lock-accent;
 }
 
 #input-field:focus {
-  border-color: @palette-rust;
+  border-color: @lock-accent;
   box-shadow: none;
 }
 
 #unlock-button {
   min-height: 38px;
   padding: 0 18px;
-  color: @palette-white;
-  background-color: @palette-rust;
+  color: @lock-on-button;
+  background-color: @lock-button;
   background-image: none;
-  border: 2px solid @palette-rust;
+  border: 2px solid @lock-button;
   border-radius: 0;
   box-shadow: none;
   text-shadow: none;
@@ -79,35 +81,35 @@ window.focused:not(.hidden) #date-label {
 
 #unlock-button:hover,
 #unlock-button:focus {
-  color: @palette-white;
-  background-color: @palette-navy;
+  color: @lock-background;
+  background-color: @lock-foreground;
   background-image: none;
-  border-color: @palette-navy;
+  border-color: @lock-foreground;
   box-shadow: none;
 }
 
 #unlock-button:disabled {
-  color: @palette-overlay;
-  background-color: @palette-slate;
+  color: @lock-muted;
+  background-color: @lock-overlay;
   background-image: none;
-  border-color: @palette-slate;
+  border-color: @lock-overlay;
 }
 
 #warning-label {
-  color: @palette-white;
-  text-shadow: 0 1px 3px alpha(@palette-ink, 0.8);
+  color: #ffffff;
+  text-shadow: 0 1px 3px alpha(#000000, 0.6);
 }
 
 #error-label {
-  color: @palette-white;
+  color: #ffffff;
   font-weight: 700;
-  text-shadow: 0 1px 3px alpha(@palette-red, 0.9);
+  text-shadow: 0 1px 3px alpha(@lock-red, 0.9);
 }
 
 infobar {
-  color: @palette-ink;
-  background-color: @palette-overlay;
-  border: 1px solid @palette-slate;
+  color: @lock-foreground;
+  background-color: @lock-overlay;
+  border: 1px solid @lock-muted;
   border-radius: 0;
   box-shadow: none;
 }
