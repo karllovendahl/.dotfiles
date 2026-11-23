@@ -252,7 +252,7 @@ migrate_legacy_linux_links() {
 log "Stowing the shared configuration"
 stow --dir="$REPO_ROOT" --target="$HOME" --restow common
 log "Migrating legacy Linux links and stowing Fedora configuration"
-migrate_legacy_linux_links fedora-home
+migrate_legacy_linux_links fedora
 "$HOME/.local/bin/palette-apply" --fedora
 
 if [[ -r "$HOME/Pictures/wallpapers/wallpaper_icy.jpg" ]]; then

@@ -71,9 +71,9 @@ render "fuzzel.ini" "$REPO_ROOT/common/.config/palette/generated/fuzzel.ini"
 render "gtklock.css" "$REPO_ROOT/common/.config/palette/generated/gtklock.css"
 
 if [[ "$profile" == "fedora" ]]; then
-  render "waybar-colors.css" "$REPO_ROOT/fedora-home/.config/waybar/colors.css"
-  render "dunstrc" "$REPO_ROOT/fedora-home/.config/dunst/dunstrc"
-  render "workspace-brackets.svg" "$REPO_ROOT/fedora-home/.config/waybar/workspace-brackets.svg"
+  render "waybar-colors.css" "$REPO_ROOT/fedora/.config/waybar/colors.css"
+  render "dunstrc" "$REPO_ROOT/fedora/.config/dunst/dunstrc"
+  render "workspace-brackets.svg" "$REPO_ROOT/fedora/.config/waybar/workspace-brackets.svg"
 fi
 
 if [[ "$mode" == "check" && "$changed" -ne 0 ]]; then

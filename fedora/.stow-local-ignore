@@ -1,0 +1,4 @@
+# Privileged files are installed explicitly by fedora-install.sh, not stowed.
+^/etc
+^/README.*
+\.git

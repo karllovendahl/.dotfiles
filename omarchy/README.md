@@ -6,4 +6,4 @@ Omarchy-specific home-directory configuration belongs here. It owns Walker and t
 stow --target="$HOME" --restow common omarchy
 ```
 
-It intentionally does not own Fedora's Sway, Waybar, Fuzzel, gtklock, or GNOME configuration. Those belong only to `fedora-home/`.
+It intentionally does not own Fedora's Sway, Waybar, Fuzzel, gtklock, or GNOME configuration. Those belong only to `fedora/`.
