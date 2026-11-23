@@ -1,6 +1,6 @@
 # Omarchy Package
 
-Omarchy-specific home-directory configuration belongs here. It owns Walker, the Omarchy `theme-set` hook that renders the dotfiles templates after every Omarchy theme switch, and must be Stowed with `common/` on the Omarchy machine:
+Omarchy-specific home-directory configuration belongs here. It owns Walker, the Omarchy `theme-set` hook that renders the dotfiles templates after every Omarchy theme switch, and the `ink-paper` user theme link, and must be Stowed with `common/` on the Omarchy machine:
 
 ```bash
 stow --target="$HOME" --restow common omarchy

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Toggle between the light and dark workstation themes.
+# Override the pair with THEME_LIGHT / THEME_DARK.
+
+set -euo pipefail
+
+light="${THEME_LIGHT:-ink-paper}"
+dark="${THEME_DARK:-everforest}"
+current="$(cat "$HOME/.config/theme/current/name" 2>/dev/null || true)"
+
+if [[ "$current" == "$dark" ]]; then next="$light"; else next="$dark"; fi
+exec "$HOME/.local/bin/theme-set" "$next"

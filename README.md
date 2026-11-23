@@ -80,14 +80,16 @@ hierarchy reads the same in Waybar, tmux, Sway and every theme:
 | Faint lines | `line` | inactive pane borders, tooltip borders |
 | State only | `color1` red, `color2` green, `color3` yellow | battery, muted volume, tmux prefix and copy mode (green tint), search hits (yellow), Neovim insert, visual and replace modes, urgent |
 
-Switch with `theme-set <name>`. The installers
+Switch with `theme-set <name>` or `theme-toggle` (light `ink-paper` ↔ dark
+`everforest`; override with `THEME_LIGHT` / `THEME_DARK`). The installers
 render the current theme once after stowing; on a fresh manual `stow`, run
 `theme-set ink-paper` once.
 
 On Omarchy, Omarchy owns switching: `theme-set` calls `omarchy-theme-set`, and
 the `theme-set` hook renders the dotfiles templates from Omarchy's current
 `colors.toml`. Any Omarchy theme, including ones picked from Omarchy's menu,
-therefore also themes WezTerm, Neovim, tmux and the prompt.
+therefore also themes WezTerm, Neovim, tmux and the prompt. `ink-paper` is
+exposed to Omarchy as a user theme.
 
 ## Notes
 
@@ -110,7 +112,7 @@ The installer uses WezTerm's official nightly COPR, installs Powerlevel10k and H
 
 Sway is the primary tiling session; stock GNOME remains available from GDM's gear menu. Sway uses Fedora's maintained session, portal, and autostart integration with personal output, input, binding, Waybar, gtklock, and `wdisplays` configuration in `fedora/`. A user-level Sway fragment preserves Fedora's idle, display-power, logind, and before-sleep behavior while routing every lock request through one guarded gtklock command. XWayland remains installed so individual X11 applications continue to run under Sway; no X11 desktop session is configured.
 
-Sway uses Fuzzel on `Super+Space`, `wdisplays` on `Super+P`, and a full Waybar restart on `Super+Shift+Space`. The ThinkPad's star-marked user-defined key controls media: star toggles play/pause, `Shift+Star` skips forward, and `Alt+Shift+Star` goes to the previous track. Sway's personal overrides live in `fedora/.config/sway/config.d/`: `Super+H/J/K/L` focuses, `Super+Shift+H/J/K/L` moves windows, `Super+1…9/0` switches workspaces, `Super+Shift+1…9/0` moves and follows windows, `Super+T` toggles floating, `Super+W` closes, `Super+Return` opens WezTerm, `Super+P` opens display controls, `Super+Shift+Space` restarts Waybar, `Super+Shift+S` captures an area and copies it to the clipboard, and `Super+Escape` locks.
+Sway uses Fuzzel on `Super+Space`, `wdisplays` on `Super+P`, and a full Waybar restart on `Super+Shift+Space`. The ThinkPad's star-marked user-defined key controls media: star toggles play/pause, `Shift+Star` skips forward, and `Alt+Shift+Star` goes to the previous track. Sway's personal overrides live in `fedora/.config/sway/config.d/`: `Super+H/J/K/L` focuses, `Super+Shift+H/J/K/L` moves windows, `Super+1…9/0` switches workspaces, `Super+Shift+1…9/0` moves and follows windows, `Super+T` toggles floating, `Super+W` closes, `Super+Return` opens WezTerm, `Super+P` opens display controls, `Super+Shift+Space` restarts Waybar, `Super+Shift+T` toggles light and dark themes, `Super+Shift+S` captures an area and copies it to the clipboard, and `Super+Escape` locks.
 
 Privileged Fedora configuration lives under `fedora/etc/`; rerun `./fedora-install.sh` after changing it. The tracked sudo PAM policy makes terminal `sudo` use Fedora's password-only authentication stack.
 
