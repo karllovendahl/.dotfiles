@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+sink='@DEFAULT_AUDIO_SINK@'
+step='5%'
+
+case "${1:-}" in
+  up)
+    pactl set-sink-volume @DEFAULT_SINK@ +5%
+    pkill -RTMIN+8 -x waybar 2>/dev/null || true
+    ;;
+  down)
+    pactl set-sink-volume @DEFAULT_SINK@ -5%
+    pkill -RTMIN+8 -x waybar 2>/dev/null || true
+    ;;
+  mute)
+    pactl set-sink-mute @DEFAULT_SINK@ toggle
+    pkill -RTMIN+8 -x waybar 2>/dev/null || true
+    ;;
+  *)
+    printf 'usage: %s {up|down|mute}\n' "$0" >&2
+    exit 2
+    ;;
+esac
+
+# Keep notification work off the key path. The direct pactl mutation is fast;
+# reading the resulting value and delivering the OSD can happen in the
+# background without making repeated presses queue behind it.
+(
+  volume_info="$(wpctl get-volume "$sink")"
+  volume="$(awk '{ printf "%d", ($2 * 100) + 0.5 }' <<<"$volume_info")"
+
+  if grep -q '\b MUTED\b' <<<"$volume_info"; then
+    text='Volume: muted'
+    volume=0
+  else
+    text="Volume: ${volume}%"
+  fi
+
+  notify-send \
+    --app-name sway \
+    --expire-time 800 \
+    --hint string:x-canonical-private-synchronous:volume \
+    --hint "int:value:${volume}" \
+    --transient \
+    "$text" >/dev/null 2>&1
+) &

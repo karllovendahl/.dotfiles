@@ -9,7 +9,7 @@
   "reload_style_on_change": true,
   "modules-left": ["custom/mark-left", "clock", "custom/slash-left"],
   "modules-center": ["sway/workspaces"],
-  "modules-right": ["custom/slash-right", "memory", "custom/divider", "cpu", "custom/divider", "pulseaudio", "custom/divider", "network", "custom/divider", "battery"],
+  "modules-right": ["tray", "custom/slash-right", "memory", "custom/divider", "cpu", "custom/divider", "custom/volume", "custom/divider", "network", "custom/divider", "battery"],
 
   "custom/mark-left": {
     "format": "[ thock ]"
@@ -45,13 +45,18 @@
     "format": "CPU [{icon}] {usage}%",
     "format-icons": ["░░░░░", "█░░░░", "██░░░", "███░░", "████░", "█████"]
   },
-  "pulseaudio": {
-    "format": "VOL [{icon}] {volume}%",
-    "format-muted": "VOL [░░░░░] OFF",
-    "format-bluetooth": "BT [{icon}] {volume}%",
-    "format-icons": ["░░░░░", "█░░░░", "██░░░", "███░░", "████░", "█████"],
+  "custom/volume": {
+    "exec": "$HOME/.local/bin/waybar-volume",
+    "return-type": "json",
+    "interval": 1,
+    "signal": 8,
     "on-click": "pavucontrol",
-    "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle"
+    "on-click-right": "$HOME/.local/bin/sway-volume mute"
+  },
+  "tray": {
+    "icon-size": 16,
+    "spacing": 6,
+    "show-passive-items": true
   },
   "network": {
     "interval": 5,
@@ -62,10 +67,12 @@
     "tooltip-format-wifi": "{essid}\n{ipaddr}\nSignal: {signalStrength}%",
     "tooltip-format-ethernet": "{ifname}\n{ipaddr}",
     "tooltip-format-disconnected": "No network connection",
-    "on-click": "nm-connection-editor"
+    "on-click": "$HOME/.local/bin/wifi-menu",
+    "on-click-right": "nm-connection-editor"
   },
   "battery": {
     "bat": "BAT0",
+    "adapter": "AC",
     "interval": 5,
     "states": {
       "warning": 30,
@@ -73,7 +80,8 @@
     },
     "format": "BAT [{icon}] {capacity}%",
     "format-charging": "CHG [{icon}] {capacity}%",
-    "format-full": "BAT [{icon}] {capacity}%",
+    "format-plugged": "CHG [{icon}] {capacity}%",
+    "format-full": "CHG [{icon}] {capacity}%",
     "format-icons": ["░░░░░", "█░░░░", "██░░░", "███░░", "████░", "█████"]
   }
 }

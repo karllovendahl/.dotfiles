@@ -6,10 +6,13 @@
 
 (defcfg
   process-unmapped-keys yes
+  ;; Only remap the physical keyboard. Let Sway/libinput handle the
+  ;; ThinkPad hotkey and Intel HID devices so their XF86 mappings survive.
+  linux-dev-names-include "AT Translated Set 2 keyboard"
 )
 
 (defsrc
-  caps grv ralt 4
+  caps grv ralt 4 rmet
 )
 
 (defalias
@@ -19,9 +22,9 @@
 )
 
 (deflayer base
-  @cap @dollar @altgr 4
+  @cap @dollar @altgr 4 XX
 )
 
 (deflayer altgr
-  _ _ _ 5
+  _ _ _ 5 _
 )

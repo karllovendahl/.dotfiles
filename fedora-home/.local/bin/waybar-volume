@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+volume_info="$(wpctl get-volume @DEFAULT_AUDIO_SINK@)"
+volume="$(awk '{ printf "%d", ($2 * 100) + 0.5 }' <<<"$volume_info")"
+
+if grep -q '\b MUTED\b' <<<"$volume_info"; then
+  printf '{"text":"VOL [░░░░░] OFF","percentage":0,"class":"muted"}\n'
+  exit 0
+fi
+
+(( volume > 100 )) && volume=100
+meter_index=$(( (volume + 10) / 20 ))
+(( meter_index > 5 )) && meter_index=5
+meters=("░░░░░" "█░░░░" "██░░░" "███░░" "████░" "█████")
+printf '{"text":"VOL [%s] %d%%","percentage":%d}\n' \
+  "${meters[$meter_index]}" "$volume" "$volume"

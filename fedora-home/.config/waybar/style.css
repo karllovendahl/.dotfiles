@@ -61,7 +61,8 @@ window#waybar > box {
 
 #memory,
 #cpu,
-#pulseaudio,
+#custom-volume,
+#tray,
 #network,
 #battery {
   padding: 0 7px;
@@ -69,19 +70,18 @@ window#waybar > box {
   background: @surface;
 }
 
-#pulseaudio,
-#network,
 #battery {
   color: @ink;
 }
 
-#pulseaudio.muted,
+#custom-volume.muted,
 #battery.warning {
   color: @ochre;
 }
 
 #battery.charging,
 #battery.full,
+#battery.fully-charged,
 #battery.plugged {
   color: @green;
 }
