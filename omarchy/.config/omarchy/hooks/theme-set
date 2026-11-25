@@ -6,8 +6,15 @@
 
 set -euo pipefail
 
-theme_dir="$HOME/.config/omarchy/current/theme"
-name="${1:-$(cat "$HOME/.config/omarchy/current/theme.name" 2>/dev/null || echo omarchy)}"
+# Omarchy 4 stages the selected theme under XDG state; older releases used
+# ~/.config/omarchy/current. Keep the hook usable on both.
+theme_dir="$HOME/.local/state/omarchy/current/theme"
+theme_name_file="$HOME/.local/state/omarchy/current/theme.name"
+if [[ ! -d "$theme_dir" ]]; then
+  theme_dir="$HOME/.config/omarchy/current/theme"
+  theme_name_file="$HOME/.config/omarchy/current/theme.name"
+fi
+name="${1:-$(cat "$theme_name_file" 2>/dev/null || echo omarchy)}"
 
 if [[ -f "$theme_dir/colors.toml" ]]; then
   "$HOME/.local/bin/theme-render" "$theme_dir/colors.toml" "$name"

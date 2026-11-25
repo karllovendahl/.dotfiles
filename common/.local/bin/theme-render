@@ -37,6 +37,29 @@ done <"$colors_file"
 
 get() { awk -F= -v k="$1" '$1 == k { v = $2 } END { print v }' "$keys"; }
 has() { [[ -n "$(get "$1")" ]]; }
+default() { has "$1" || printf '%s=%s\n' "$1" "$2" >>"$keys"; }
+
+# Omarchy 4 uses semantic colour names; earlier themes use color0–color15.
+# Normalize both formats so templates and local themes remain portable.
+default color0 "$(get background)"
+default color1 "$(get red)"
+default color2 "$(get green)"
+default color3 "$(get yellow)"
+default color4 "$(get blue)"
+default color5 "$(get magenta)"
+default color6 "$(get cyan)"
+default color7 "$(get foreground)"
+default color8 "$(get muted)"
+default color9 "$(get bright_red)"
+default color10 "$(get bright_green)"
+default color11 "$(get bright_yellow)"
+default color12 "$(get bright_blue)"
+default color13 "$(get bright_magenta)"
+default color14 "$(get bright_cyan)"
+default color15 "$(get bright_foreground)"
+default cursor "$(get bright_foreground)"
+default selection_background "$(get selection)"
+default selection_foreground "$(get bright_foreground)"
 
 # Mix two #rrggbb colours: blend <from> <to> <percent of to>.
 blend() {
@@ -54,7 +77,6 @@ done
 
 bg="$(get background)"; fg="$(get foreground)"
 # Derive any chrome key the theme leaves out.
-default() { has "$1" || printf '%s=%s\n' "$1" "$2" >>"$keys"; }
 default cursor "$fg"
 default selection_background "$(blend "$bg" "$fg" 25)"
 default selection_foreground "$fg"
@@ -74,7 +96,7 @@ default diff_text "$(blend "$bg" "$(get color4)" 28)"
 # button_fill (the lock screen's unlock button) is a dark green: plain green on
 # light themes, the mode_fill tint on dark ones.
 # match_fill (yellow, like a highlighter) marks copy-mode search hits.
-if [[ -f "$theme_dir/light.mode" ]]; then
+if [[ -f "$theme_dir/light.mode" || "$(get mode)" == light ]]; then
   default mode light
   default frame "$(get accent)"
   default focus_fill "$(get accent)"
