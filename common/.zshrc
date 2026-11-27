@@ -42,6 +42,14 @@ _theme_sync() {
 autoload -Uz add-zsh-hook
 add-zsh-hook precmd _theme_sync
 
+# tuicr picks its theme once at startup and cannot tell the mode inside tmux,
+# so pass the current theme's mode; config.toml maps it to a theme.
+tuicr() {
+  local mode
+  mode=$(sed -n 's/^THEME_MODE="\(.*\)"$/\1/p' "$HOME/.config/theme/current/colors.sh" 2>/dev/null)
+  command tuicr ${mode:+--appearance=$mode} "$@"
+}
+
 ################### EXPORTS ######################
 
 export EDITOR="nvim"

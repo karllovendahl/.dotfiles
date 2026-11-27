@@ -1,0 +1,3 @@
+# The zsh tuicr wrapper passes --appearance with the current theme's mode.
+theme_light = "ayu-light"
+theme_dark = "everforest-dark"
